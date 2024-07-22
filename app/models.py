@@ -1,10 +1,7 @@
-import hashlib
 from datetime import datetime
-
 from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -22,10 +19,10 @@ class User(db.Model, UserMixin):
         return check_password_hash(self.password_hash, password)
 
     def set_phone(self, phone):
-        self.phone_hash = hashlib.sha256(phone.encode()).hexdigest()
+        self.phone_hash = generate_password_hash(phone)
 
     def check_phone(self, phone):
-        return self.phone_hash == hashlib.sha256(phone.encode()).hexdigest()
+        return check_password_hash(self.phone_hash, phone)
 
 class Location(db.Model):
     id = db.Column(db.Integer, primary_key=True)

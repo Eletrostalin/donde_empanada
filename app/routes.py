@@ -11,7 +11,8 @@ logging.basicConfig(level=logging.DEBUG)
 @bp.route('/')
 def index():
     locations = Location.query.all()
-    return render_template('index.html', locations=locations)
+    form = RegistrationForm()  # Добавление пустой формы для CSRF токена
+    return render_template('index.html', locations=locations, form=form)
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -21,7 +22,7 @@ def register():
             username=form.username.data,
             email=form.email.data,
             first_name=form.first_name.data,
-            second_name=form.second_name.data
+            second_name=form.second_name.data,
         )
         user.set_password(form.password.data)
         user.set_phone(form.phone.data)

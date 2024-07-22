@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField, IntegerField, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError, Optional
 import re
 
@@ -33,3 +33,8 @@ class LocationForm(FlaskForm):
     latitude = StringField('Latitude', validators=[DataRequired()])
     longitude = StringField('Longitude', validators=[DataRequired()])
     submit = SubmitField('Add Location')
+
+class ReviewForm(FlaskForm):
+    rating = IntegerField('Rating', validators=[DataRequired()])
+    comment = TextAreaField('Comment', validators=[DataRequired()])
+    submit = SubmitField('Add Review')

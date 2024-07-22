@@ -11,7 +11,7 @@
     <style>
         #map { height: 80vh; }
         .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 50px; background: rgba(255, 255, 255, 0.8); }
-        .logo img { width: 100px; height: auto; }
+        .logo img { width: 100px; height: auto; } /* Размеры лого */
         .btn-custom {
             background-color: transparent;
             color: black;
@@ -29,11 +29,24 @@
     <div id="map"></div>
     <header class="header" style="margin-right: 32px; margin-left: 32px">
         <div class="logo">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo"> <!-- Лого из PNG файла -->
         </div>
-        <button class="btn btn-custom" type="button" style="margin-right: 16px;" data-bs-toggle="modal" data-bs-target="#loginModal">
-            Войти
-        </button>
+        {% if current_user.is_authenticated %}
+            <div class="dropdown">
+                <button class="btn btn-custom dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                    {{ current_user.username }}
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="userMenu">
+                    <li><a class="dropdown-item" href="#">Аккаунт</a></li>
+                    <li><a class="dropdown-item" href="#">Настройки</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('main.logout') }}">Выйти</a></li>
+                </ul>
+            </div>
+        {% else %}
+            <button class="btn btn-custom" type="button" style="margin-right: 16px;" data-bs-toggle="modal" data-bs-target="#loginModal">
+                Войти
+            </button>
+        {% endif %}
     </header>
     <div>
         {% block content %}{% endblock %}
@@ -49,7 +62,6 @@
           </div>
           <div class="modal-body">
             <form id="loginForm">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <div class="mb-3">
                 <label for="loginUsername" class="form-label">Имя пользователя:</label>
                 <input type="text" class="form-control" id="loginUsername" name="username" required>
@@ -58,6 +70,7 @@
                 <label for="loginPassword" class="form-label">Пароль:</label>
                 <input type="password" class="form-control" id="loginPassword" name="password" required>
               </div>
+              {{ form.hidden_tag() }}
               <button type="submit" class="btn btn-primary">Войти</button>
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
             </form>
@@ -79,7 +92,6 @@
           </div>
           <div class="modal-body">
             <form id="registerForm">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <div class="mb-3">
                 <label for="username" class="form-label">Имя пользователя:</label>
                 <input type="text" class="form-control" id="username" name="username" required>
@@ -97,17 +109,10 @@
                 <input type="email" class="form-control" id="email" name="email">
               </div>
               <div class="mb-3">
-                <label for="first_name" class="form-label">Имя:</label>
-                <input type="text" class="form-control" id="first_name" name="first_name" required>
-              </div>
-              <div class="mb-3">
-                <label for="second_name" class="form-label">Фамилия:</label>
-                <input type="text" class="form-control" id="second_name" name="second_name" required>
-              </div>
-              <div class="mb-3">
                 <label for="phone" class="form-label">Телефон:</label>
                 <input type="text" class="form-control" id="phone" name="phone" required>
               </div>
+              {{ form.hidden_tag() }}
               <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
             </form>
