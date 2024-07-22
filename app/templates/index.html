@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Home Page - Map Marker Application{% endblock %}
+
+{% block content %}
+    <div id="container">
+
+        <button id="add-marker-button" class="btn add-location-button">+</button>
+
+        <!-- Форма для ввода данных метки -->
+        <div id="marker-form" class="marker-form" style="display: none;">
+            <form id="add-marker-form">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                </div>
+                <input type="hidden" id="latitude" name="latitude">
+                <input type="hidden" id="longitude" name="longitude">
+                <button type="submit" class="btn btn-primary">Add Marker</button>
+                <button type="button" id="cancel-button" class="btn btn-secondary">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        let addMarkerMode = false;
+
+        document.getElementById('add-marker-button').addEventListener('click', function() {
+            addMarkerMode = !addMarkerMode;
+            this.classList.toggle('active');
+            if (addMarkerMode) {
+                document.getElementById('map').style.cursor = 'pointer';
+            } else {
+                document.getElementById('map').style.cursor = 'default';
+            }
+        });
+
+        document.getElementById('cancel-button').addEventListener('click', function() {
+            document.getElementById('marker-form').style.display = 'none';
+            addMarkerMode = false;
+            document.getElementById('add-marker-button').classList.remove('active');
+            document.getElementById('map').style.cursor = 'default';
+        });
+
+        document.getElementById('add-marker-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const description = document.getElementById('description').value;
+            const latitude = document.getElementById('latitude').value;
+            const longitude = document.getElementById('longitude').value;
+
+            fetch('/add_marker', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, latitude, longitude, description })
+            })
+            .then(response => response.json())
+            .then(data => {
+                var placemark = new ymaps.Placemark([data.latitude, data.longitude], {
+                    balloonContent: `<div><strong>${data.name}</strong><br>${data.description}</div>`,
+                    iconLayout: 'default#image',
+                    iconImageHref: '{{ url_for('static', filename='marker.png') }}', // Путь к вашему PNG файлу
+                    iconImageSize: [30, 42],
+                    iconImageOffset: [-15, -42]
+                });
+                map.geoObjects.add(placemark);
+                document.getElementById('marker-form').style.display = 'none';
+                addMarkerMode = false;
+                document.getElementById('add-marker-button').classList.remove('active');
+                document.getElementById('map').style.cursor = 'default';
+            });
+        });
+
+        ymaps.ready(init);
+
+        function init() {
+            var map = new ymaps.Map("map", {
+                center: [55.76, 37.64], // Координаты центра карты
+                zoom: 8,
+                controls: [] // Убираем все элементы управления
+            });
+
+            // Загрузка меток с сервера
+            fetch('/markers')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(marker => {
+                        var placemark = new ymaps.Placemark([marker.latitude, marker.longitude], {
+                            balloonContent: `<div><strong>${marker.name}</strong><br>${marker.description}</div>`,
+                            iconLayout: 'default#image',
+                            iconImageHref: '{{ url_for('static', filename='marker.png') }}', // Путь к вашему PNG файлу
+                            iconImageSize: [30, 42],
+                            iconImageOffset: [-15, -42]
+                        });
+                        map.geoObjects.add(placemark);
+                    });
+                });
+
+            // Добавление метки по клику
+            map.events.add('click', function (e) {
+                if (addMarkerMode) {
+                    var coords = e.get('coords');
+                    document.getElementById('latitude').value = coords[0];
+                    document.getElementById('longitude').value = coords[1];
+                    document.getElementById('marker-form').style.display = 'block';
+                }
+            });
+        }
+    </script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+{% endblock %}

@@ -1,0 +1,105 @@
+/* Скрываем хедер */
+header {
+    display: none;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+.header {
+    position: relative;
+    top: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: auto;
+    background: rgba(255, 255, 255, 0.8); /* Менее прозрачный белый фон */
+    z-index: 2;
+    border-radius: 24px;
+    padding-right: 0;
+    padding-left: 0;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+#map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.logo img {
+    width: 40px;
+    height: 40px;
+    margin-left: 20px;
+}
+
+.add-location-button {
+    position: absolute;
+    top: 30%;
+    right: 40px;
+    z-index: 1000;
+    font-size: 24px;
+    line-height: 36px;
+    width: 150px;
+    height: 80px;
+    text-align: center;
+    padding: 0;
+    background-color: white;
+    color: black;
+    border: 2px ;
+    border-radius: 10px; /* Скругленные углы */
+    text-decoration: none; /* Убираем подчеркивание */
+    cursor: pointer; /* Изменение курсора на указатель */
+    transition: box-shadow 0.3s ease; /* Добавляем плавный переход для эффекта */
+}
+
+.add-location-button.active {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Добавляем тень для активного состояния */
+}
+
+.marker-form {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: white;
+    padding: 20px;
+    border: 2px solid black;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+}
+
+.btn-custom {
+    background-color: transparent;
+    color: black;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 10px 20px;
+}
+
+.btn-custom:hover {
+    color: red;
+}
+
+.flash {
+    padding: 10px;
+}
+
+.flash.success {
+    border: 1px solid #21DB56;
+    background: #AEFFC5;
+}
+
+.flash.error {
+    border: 1px solid #FF4343;
+    background: #dc3545;
+}
