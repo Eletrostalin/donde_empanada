@@ -55,20 +55,46 @@ def logout():
     logout_user()
     return redirect(url_for('main.index'))
 
-@bp.route('/add_location', methods=['GET', 'POST'])
+@bp.route('/add_location', methods=['POST'])
 @login_required
 def add_location():
+    logging.debug('Получен запрос на добавление метки')
     form = LocationForm()
     if form.validate_on_submit():
-        new_location = Location(
-            name=form.name.data,
-            description=form.description.data,
-            latitude=form.latitude.data,
-            longitude=form.longitude.data,
-            created_by=current_user.id
-        )
-        db.session.add(new_location)
-        db.session.commit()
-        flash('Точка успешно добавлена! 📍', 'success')
-        return redirect(url_for('main.index'))
-    return render_template('add_location.html', form=form)
+        logging.debug('Форма прошла валидацию')
+        try:
+            latitude = float(request.form['latitude'])
+            longitude = float(request.form['longitude'])
+            new_location = Location(
+                name=form.name.data,
+                description=form.description.data,
+                address=form.address.data,
+                working_hours=form.working_hours.data,
+                average_check=form.average_check.data,
+                latitude=latitude,
+                longitude=longitude,
+                created_by=current_user.id
+            )
+            db.session.add(new_location)
+            db.session.commit()
+            logging.debug('Метка успешно добавлена в базу данных')
+            return jsonify(success=True)
+        except Exception as e:
+            logging.error('Ошибка при добавлении метки: %s', e)
+            return jsonify(success=False, message=str(e))
+    else:
+        logging.debug('Ошибка валидации формы: %s', form.errors)
+        return jsonify(success=False, message=form.errors)
+
+@bp.route('/markers')
+def markers():
+    locations = Location.query.all()
+    markers = []
+    for location in locations:
+        markers.append({
+            'name': location.name,
+            'description': location.description,
+            'latitude': location.latitude,
+            'longitude': location.longitude
+        })
+    return jsonify(markers)

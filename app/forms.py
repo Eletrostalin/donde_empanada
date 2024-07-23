@@ -29,9 +29,10 @@ class LoginForm(FlaskForm):
 
 class LocationForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
-    description = StringField('Description', validators=[DataRequired()])
-    latitude = StringField('Latitude', validators=[DataRequired()])
-    longitude = StringField('Longitude', validators=[DataRequired()])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    address = StringField('Address', validators=[DataRequired()])
+    working_hours = StringField('Working Hours', validators=[DataRequired()])
+    average_check = IntegerField('Average Check', validators=[DataRequired()])  # Изменение типа на Integer
     submit = SubmitField('Add Location')
 
 class ReviewForm(FlaskForm):

@@ -30,10 +30,13 @@ class Location(db.Model):
     description = db.Column(db.Text, nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
-    average_rating = db.Column(db.Float, nullable=True)
+    average_rating = db.Column(db.Float, default=0, nullable=False)
     rating_count = db.Column(db.Integer, default=0)
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    address = db.Column(db.String(255), nullable=True)
+    working_hours = db.Column(db.String(255), nullable=True)
+    average_check = db.Column(db.Integer, nullable=True)
 
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
