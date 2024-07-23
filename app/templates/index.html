@@ -9,7 +9,7 @@
         <!-- Форма для ввода данных метки -->
         <div id="marker-form" class="marker-form" style="display: none;">
             <form id="add-marker-form" method="post">
-                {{ form.hidden_tag() }}
+                {{ form.csrf_token }}
                 <div class="mb-3">
                     <label for="name" class="form-label">Название</label>
                     <input type="text" class="form-control" id="name" name="name" required>
@@ -75,28 +75,26 @@
                 working_hours: formData.get('working_hours'),
                 average_check: formData.get('average_check'),
                 latitude: latitude,
-                longitude: longitude
+                longitude: longitude,
+                csrf_token: formData.get('csrf_token')
             });
 
             fetch('/add_location', {
                 method: 'POST',
-                headers: {
-                    'X-CSRFToken': formData.get('csrf_token')  // Добавление CSRF-токена в заголовок
-                },
                 body: formData
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Метка успешно добавлена!');
+                    alert('Метка успешно добавлена! 😊');
                     location.reload();
                 } else {
-                    alert('Ошибка добавления метки: ' + data.message);
+                    alert('Ошибка добавления метки: ' + data.message + ' 🚫');
                 }
             })
             .catch(error => {
                 console.error('Произошла ошибка:', error);
-                alert('Произошла ошибка: ' + error.message);
+                alert('Произошла ошибка: ' + error.message + ' 🚫');
             });
         });
 
@@ -108,22 +106,6 @@
                 zoom: 8,
                 controls: [] // Убираем все элементы управления
             });
-
-            // Загрузка меток с сервера
-            fetch('/markers')
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(marker => {
-                        var placemark = new ymaps.Placemark([marker.latitude, marker.longitude], {
-                            balloonContent: `<div><strong>${marker.name}</strong><br>${marker.description}</div>`,
-                            iconLayout: 'default#image',
-                            iconImageHref: '{{ url_for('static', filename='marker.png') }}', // Путь к вашему PNG файлу
-                            iconImageSize: [30, 42],
-                            iconImageOffset: [-15, -42]
-                        });
-                        map.geoObjects.add(placemark);
-                    });
-                });
 
             // Добавление метки по клику
             map.events.add('click', function (e) {

@@ -3,8 +3,20 @@ from wtforms import StringField, PasswordField, SubmitField, IntegerField, TextA
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError, Optional
 import re
 
+def validate_username(form, field):
+    if not re.match(r'^[a-zA-Z]+$', field.data):  # Только буквы
+        raise ValidationError('Имя пользователя должно содержать только буквы.')
+
+def validate_name(form, field):
+    if not re.match(r'^[a-zA-Z]+$', field.data):
+        raise ValidationError('Это поле должно содержать только буквы.')
+
+def validate_phone(form, field):
+    if not re.match(r'^[0-9]+$', field.data):
+        raise ValidationError('Телефон должен содержать только цифры.')
+
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(message="Поле не может быть пустым")])
+    username = StringField('Username', validators=[DataRequired(message="Поле не может быть пустым"), validate_username])
     email = StringField('Email', validators=[Optional(), Email(message="Неправильный формат email")])
     password = PasswordField('Password', validators=[
         DataRequired(message="Поле не может быть пустым"),
@@ -17,9 +29,9 @@ class RegistrationForm(FlaskForm):
         DataRequired(message="Поле не может быть пустым"),
         EqualTo('password', message="Пароли должны совпадать")
     ])
-    first_name = StringField('First Name', validators=[DataRequired(message="Поле не может быть пустым")])
-    second_name = StringField('Second Name', validators=[DataRequired(message="Поле не может быть пустым")])
-    phone = StringField('Phone', validators=[DataRequired(message="Поле не может быть пустым")])
+    first_name = StringField('First Name', validators=[DataRequired(message="Поле не может быть пустым"), validate_name])
+    second_name = StringField('Second Name', validators=[DataRequired(message="Поле не может быть пустым"), validate_name])
+    phone = StringField('Phone', validators=[DataRequired(message="Поле не может быть пустым"), validate_phone])
     submit = SubmitField('Register')
 
 class LoginForm(FlaskForm):

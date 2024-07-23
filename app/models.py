@@ -6,11 +6,11 @@ from flask_login import UserMixin
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
-    email = db.Column(db.String(150), unique=True, nullable=True)
+    email = db.Column(db.String(150), nullable=True)  # Email не обязательный и не уникальный
     password_hash = db.Column(db.String(256), nullable=False)
     first_name = db.Column(db.String(150), nullable=False)
     second_name = db.Column(db.String(150), nullable=False)
-    phone_hash = db.Column(db.String(256), nullable=False)
+    phone_hash = db.Column(db.String(256), unique=True, nullable=False)  # Phone уникальный
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

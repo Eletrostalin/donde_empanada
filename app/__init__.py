@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
+import logging
+from logging import StreamHandler
 
 # Инициализация расширений
 db = SQLAlchemy()
@@ -29,5 +31,11 @@ def create_app():
 
     from . import routes
     app.register_blueprint(routes.bp)
+
+    # Настройка логирования
+    stream_handler = StreamHandler()
+    stream_handler.setLevel(logging.DEBUG)
+    app.logger.addHandler(stream_handler)
+    app.logger.setLevel(logging.DEBUG)
 
     return app
