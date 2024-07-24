@@ -17,10 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             if (data.success) {
-                alert('Вход выполнен успешно! 😊');
                 var loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
                 loginModal.hide();
-                location.reload(); // Перезагрузка страницы после закрытия модального окна
+                location.reload(); // Перезагрузка страницы после успешного входа
             } else {
                 alert('Ошибка входа: ' + data.message + ' 🚫');
             }
@@ -48,11 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             if (data.success) {
-                alert('Регистрация прошла успешно! 😊');
-                var registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
-                registerModal.hide();
-                var loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-                loginModal.show();
+                location.reload(); // Перезагрузка страницы после успешной регистрации
             } else {
                 alert('Ошибка регистрации: ' + data.message + ' 🚫');
             }
