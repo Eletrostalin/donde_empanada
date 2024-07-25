@@ -3,16 +3,18 @@ from flask_login import login_user, logout_user, current_user, login_required
 from .models import db, User, Location
 from .forms import RegistrationForm, LoginForm, LocationForm
 import logging
+import os
 
 bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def index():
-    locations = Location.query.all()
-    form = RegistrationForm()  # Добавление пустой формы для CSRF токена
-    return render_template('index.html', locations=locations, form=form)
+    app.logger.info('Загрузка главной страницы')
+    form = RegistrationForm()
+    google_maps_api_key = os.getenv('GOOGLE_MAPS_API_KEY')
+    return render_template('index.html', form=form, google_maps_api_key=google_maps_api_key)
 
-@bp.route('/register', methods=['GET', 'POST'])
+@bp.route('/register', methods=['POST'])
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -20,12 +22,16 @@ def register():
         existing_user_by_phone = User.query.filter_by(phone_hash=form.phone.data).first()
 
         if existing_user_by_username:
-            flash('Пользователь с таким именем уже существует. 🚫', 'danger')
-            return jsonify(success=False, message='Пользователь с таким именем уже существует. 🚫')
+            message = 'Пользователь с таким именем уже существует. 🚫'
+            flash(message, 'danger')
+            app.logger.warning(message)
+            return jsonify(success=False, message=message)
 
         if existing_user_by_phone:
-            flash('Пользователь с таким телефоном уже существует. 🚫', 'danger')
-            return jsonify(success=False, message='Пользователь с таким телефоном уже существует. 🚫')
+            message = 'Пользователь с таким телефоном уже существует. 🚫'
+            flash(message, 'danger')
+            app.logger.warning(message)
+            return jsonify(success=False, message=message)
 
         user = User(
             username=form.username.data,
@@ -37,37 +43,48 @@ def register():
         user.set_phone(form.phone.data)
         db.session.add(user)
         db.session.commit()
-        flash('Регистрация прошла успешно! 😊', 'success')
+        message = 'Регистрация прошла успешно! 😊'
+        flash(message, 'success')
+        app.logger.info(message)
         return jsonify(success=True)
     else:
         error_messages = [f"{field}: {', '.join(errors)}" for field, errors in form.errors.items()]
-        flash(f'Ошибка регистрации: {", ".join(error_messages)} 🚫', 'danger')
-        app.logger.debug(f'Ошибка валидации формы: {form.errors}')
-        return jsonify(success=False, message=", ".join(error_messages))
+        message = f'Ошибка регистрации: {", ".join(error_messages)} 🚫'
+        flash(message, 'danger')
+        app.logger.error(f'Ошибка валидации формы: {form.errors}')
+        return jsonify(success=False, message=message)
 
-@bp.route('/login', methods=['GET', 'POST'])
+@bp.route('/login', methods=['POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user and user.check_password(form.password.data):
             login_user(user)
-            flash('Вход выполнен успешно! 😊', 'success')
-            return jsonify(success=True)
+            message = 'Вход выполнен успешно! 😊'
+            flash(message, 'success')
+            app.logger.info(message)
+            return redirect(url_for('main.index'))
         else:
-            flash('Ошибка входа. Проверьте имя пользователя и пароль. 🚫', 'danger')
-            return jsonify(success=False, message='Ошибка входа. Проверьте имя пользователя и пароль.')
+            message = 'Ошибка входа. Проверьте имя пользователя и пароль. 🚫'
+            flash(message, 'danger')
+            app.logger.warning(message)
+            return jsonify(success=False, message=message)
     else:
         if request.method == 'POST':
             error_messages = [f"{field}: {', '.join(errors)}" for field, errors in form.errors.items()]
-            flash(f'Ошибки валидации формы: {", ".join(error_messages)} 🚫', 'danger')
-    return render_template('login.html', form=form)
+            message = f'Ошибки валидации формы: {", ".join(error_messages)} 🚫'
+            flash(message, 'danger')
+            app.logger.error(f'Ошибка валидации формы: {form.errors}')
+            return jsonify(success=False, message=message)
 
 @bp.route('/logout')
 @login_required
 def logout():
     logout_user()
-    flash('Вы успешно вышли из системы! 😊', 'success')
+    message = 'Вы успешно вышли из системы! 😊'
+    flash(message, 'success')
+    app.logger.info(message)
     return redirect(url_for('main.index'))
 
 @bp.route('/add_location', methods=['POST'])
@@ -78,8 +95,8 @@ def add_location():
     if form.validate_on_submit():
         app.logger.debug('Форма прошла валидацию')
         try:
-            latitude = request.form['latitude']
-            longitude = request.form['longitude']
+            latitude = float(request.form['latitude'])
+            longitude = float(request.form['longitude'])
             app.logger.debug('Координаты: %s, %s', latitude, longitude)
             new_location = Location(
                 name=form.name.data,
@@ -93,15 +110,18 @@ def add_location():
             )
             db.session.add(new_location)
             db.session.commit()
-            app.logger.debug('Метка успешно добавлена в базу данных')
+            message = 'Метка успешно добавлена в базу данных! 😊'
+            app.logger.info(message)
             return jsonify(success=True)
         except Exception as e:
-            app.logger.error('Ошибка при добавлении метки: %s', e)
-            return jsonify(success=False, message=f'Произошла ошибка при добавлении метки: {e} 🚫')
+            message = f'Произошла ошибка при добавлении метки: {e} 🚫'
+            app.logger.error(message)
+            return jsonify(success=False, message=message)
     else:
         error_messages = [f"{field}: {', '.join(errors)}" for field, errors in form.errors.items()]
-        app.logger.debug('Ошибка валидации формы: %s', form.errors)
-        return jsonify(success=False, message=f'Ошибки валидации формы: {", ".join(error_messages)} 🚫')
+        message = f'Ошибки валидации формы: {", ".join(error_messages)} 🚫'
+        app.logger.error(f'Ошибка валидации формы: {form.errors}')
+        return jsonify(success=False, message=message)
 
 @bp.route('/markers')
 def markers():
@@ -114,4 +134,5 @@ def markers():
             'latitude': location.latitude,
             'longitude': location.longitude
         })
+    app.logger.info('Список меток успешно загружен')
     return jsonify(markers)

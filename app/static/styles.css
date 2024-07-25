@@ -1,105 +1,116 @@
-/* Скрываем хедер */
-header {
-    display: none;
-}
-
 body, html {
-    margin: 0;
-    padding: 0;
     height: 100%;
-    overflow: hidden;
-}
-
-.header {
-    position: relative;
-    top: 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: auto;
-    background: rgba(255, 255, 255, 0.8); /* Менее прозрачный белый фон */
-    z-index: 2;
-    border-radius: 24px;
-    padding-right: 0;
-    padding-left: 0;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    margin: 0;
+    font-family: Arial, sans-serif;
 }
 
 #map {
+    height: 100%;
+}
+
+.header {
     position: absolute;
-    top: 0;
+    top: 30px;
+    left: 30px;
+    right: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 2;
+    border-radius: 24px;
+    padding: 0 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.header img {
+    height: 50px;
+}
+
+.header .login-button {
+    cursor: pointer;
+}
+
+.custom-button {
+    position: absolute;
+    top: 100px;
+    left: 50px;
+    z-index: 2;
+}
+
+.custom-button img {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+}
+
+.custom-button-right {
+    position: absolute;
+    top: 100px;
+    right: 50px;
+    z-index: 2;
+}
+
+.custom-button-right img {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 3;
     left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px;
+    border-radius: 10px;
+}
+
+.modal-content input, .modal-content button {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle {
+    cursor: pointer;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
 }
 
-.logo img {
-    width: 40px;
-    height: 40px;
-    margin-left: 20px;
-}
-
-.add-location-button {
-    position: absolute;
-    top: 30%;
-    right: 40px;
-    z-index: 1000;
-    font-size: 24px;
-    line-height: 36px;
-    width: 150px;
-    height: 80px;
-    text-align: center;
-    padding: 0;
-    background-color: white;
+.dropdown-content a {
     color: black;
-    border: 2px ;
-    border-radius: 10px; /* Скругленные углы */
-    text-decoration: none; /* Убираем подчеркивание */
-    cursor: pointer; /* Изменение курсора на указатель */
-    transition: box-shadow 0.3s ease; /* Добавляем плавный переход для эффекта */
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
 }
 
-.add-location-button.active {
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Добавляем тень для активного состояния */
-}
-
-.marker-form {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    background: white;
-    padding: 20px;
-    border: 2px solid black;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
-}
-
-.btn-custom {
-    background-color: transparent;
-    color: black;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
-    padding: 10px 20px;
-}
-
-.btn-custom:hover {
-    color: red;
-}
-
-.flash {
-    padding: 10px;
-}
-
-.flash.success {
-    border: 1px solid #21DB56;
-    background: #AEFFC5;
-}
-
-.flash.error {
-    border: 1px solid #FF4343;
-    background: #dc3545;
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
 }
