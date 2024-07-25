@@ -4,7 +4,9 @@
 
 {% block content %}
     <div id="container">
-        <button id="add-marker-button" class="btn add-location-button">+</button>
+        <button id="add-marker-button" class="btn add-location-button">
+            <img src="{{ url_for('static', filename='add.png') }}" alt="Add Marker" style="width: 30px; height: 30px;">
+        </button>
 
         <!-- Форма для ввода данных метки -->
         <div id="marker-form" class="marker-form" style="display: none;">
@@ -67,18 +69,6 @@
             formData.append('latitude', latitude);
             formData.append('longitude', longitude);
 
-            // Логирование данных перед отправкой
-            console.log('Отправляемые данные:', {
-                name: formData.get('name'),
-                description: formData.get('description'),
-                address: formData.get('address'),
-                working_hours: formData.get('working_hours'),
-                average_check: formData.get('average_check'),
-                latitude: latitude,
-                longitude: longitude,
-                csrf_token: formData.get('csrf_token')
-            });
-
             fetch('/add_location', {
                 method: 'POST',
                 body: formData
@@ -98,25 +88,23 @@
             });
         });
 
-        ymaps.ready(init);
-
-        function init() {
-            var map = new ymaps.Map("map", {
-                center: [55.76, 37.64], // Координаты центра карты
-                zoom: 8,
-                controls: [] // Убираем все элементы управления
+        function initMap() {
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: -34.397, lng: 150.644 },
+                zoom: 8
             });
 
-            // Добавление метки по клику
-            map.events.add('click', function (e) {
+            map.addListener('click', function(e) {
                 if (addMarkerMode) {
-                    var coords = e.get('coords');
-                    document.getElementById('latitude').value = coords[0];
-                    document.getElementById('longitude').value = coords[1];
+                    var coords = e.latLng;
+                    document.getElementById('latitude').value = coords.lat();
+                    document.getElementById('longitude').value = coords.lng();
                     document.getElementById('marker-form').style.display = 'block';
                 }
             });
         }
+
+        window.initMap = initMap;
     </script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 {% endblock %}
