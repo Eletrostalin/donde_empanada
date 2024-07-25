@@ -7,7 +7,7 @@
 
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=3f056900-8e18-461b-815a-d9724c167124" type="text/javascript"></script>
+   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCbBJZABWFSCUCLODBBX3_d1emhiyyhAR0" async defer></script>
     <style>
         #map { height: 80vh; }
         .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 50px; background: rgba(255, 255, 255, 0.8); }
@@ -131,5 +131,16 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+<script>
+        function initMap() {
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: -34.397, lng: 150.644 },
+                zoom: 8
+            });
+        }
+
+        window.initMap = initMap;
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCbBJZABWFSCUCLODBBX3_d1emhiyyhAR0&callback=initMap" async defer></script>
 </body>
 </html>
