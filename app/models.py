@@ -6,11 +6,13 @@ from flask_login import UserMixin
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
-    email = db.Column(db.String(150), nullable=True)  # Email не обязательный и не уникальный
+    email = db.Column(db.String(150), nullable=True)
     password_hash = db.Column(db.String(256), nullable=False)
     first_name = db.Column(db.String(150), nullable=False)
     second_name = db.Column(db.String(150), nullable=False)
-    phone_hash = db.Column(db.String(256), unique=True, nullable=False)  # Phone уникальный
+    phone_hash = db.Column(db.String(256), unique=True, nullable=False)
+
+    reviews = db.relationship('Review', backref='user', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -37,6 +39,8 @@ class Location(db.Model):
     address = db.Column(db.String(255), nullable=True)
     working_hours = db.Column(db.String(255), nullable=True)
     average_check = db.Column(db.Integer, nullable=True)
+
+    reviews = db.relationship('Review', backref='location', lazy=True)
 
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -140,12 +140,13 @@ def reviews(location_id):
     reviews = Review.query.filter_by(location_id=location_id).all()
     reviews_list = [
         {
-            'user_name': review.user.username,
+            'user_name': review.user.username,  # Использование отношения для получения имени пользователя
             'comment': review.comment,
             'rating': review.rating
         } for review in reviews
     ]
     return jsonify(reviews_list)
+
 
 @bp.route('/add_review', methods=['POST'])
 @login_required
