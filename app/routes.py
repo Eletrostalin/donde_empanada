@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app as app
 from flask_login import login_user, logout_user, current_user, login_required
-from .models import db, User, Location
+from .models import db, User, Location, Review
 from .forms import RegistrationForm, LoginForm, LocationForm
 import logging
 import os
@@ -120,10 +120,29 @@ def markers():
     markers = []
     for location in locations:
         markers.append({
+            'id': location.id,  # Убедитесь, что id включен
             'name': location.name,
             'description': location.description,
             'latitude': location.latitude,
-            'longitude': location.longitude
+            'longitude': location.longitude,
+            'address': location.address,
+            'working_hours': location.working_hours,
+            'average_check': location.average_check,
+            'average_rating': location.average_rating,
+            'rating_count': location.rating_count
         })
     app.logger.info('Список меток успешно загружен')
     return jsonify(markers)
+
+
+@bp.route('/reviews/<int:location_id>')
+def reviews(location_id):
+    reviews = Review.query.filter_by(location_id=location_id).all()
+    reviews_list = [
+        {
+            'user_name': review.user.username,
+            'comment': review.comment,
+            'rating': review.rating
+        } for review in reviews
+    ]
+    return jsonify(reviews_list)

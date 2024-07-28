@@ -124,13 +124,63 @@ async function fetchMarkers(map) {
         const response = await fetch('/markers');
         const markers = await response.json();
 
-        markers.forEach(marker => {
-            new google.maps.Marker({
+        for (const marker of markers) {
+            if (!marker.id) {
+                console.error('Маркер не имеет id:', marker);
+                continue;
+            }
+
+            const markerObj = new google.maps.Marker({
                 position: { lat: marker.latitude, lng: marker.longitude },
                 map: map,
                 title: marker.name
             });
-        });
+
+            let reviewsContent = '';
+            try {
+                const reviewsResponse = await fetch(`/reviews/${marker.id}`);
+                const reviewsData = await reviewsResponse.json();
+
+                if (reviewsData.length > 0) {
+                    reviewsData.forEach(review => {
+                        reviewsContent += `
+                            <div>
+                                <p><strong>${review.user_name}:</strong> ${review.comment}</p>
+                                <p>Оценка: ${review.rating}</p>
+                            </div>
+                        `;
+                    });
+                } else {
+                    reviewsContent = '<p>Отзывов пока нет.</p>';
+                }
+            } catch (error) {
+                console.error(`Ошибка при загрузке отзывов для маркера ${marker.id}:`, error);
+                reviewsContent = '<p>Ошибка при загрузке отзывов.</p>';
+            }
+
+            const infoWindowContent = `
+                <div>
+                    <h3>${marker.name}</h3>
+                    <p>${marker.description}</p>
+                    <p><strong>Адрес:</strong> ${marker.address}</p>
+                    <p><strong>Часы работы:</strong> ${marker.working_hours}</p>
+                    <p><strong>Средний чек:</strong> ${marker.average_check}</p>
+                    <p><strong>Средняя оценка:</strong> ${marker.average_rating.toFixed(1)}</p>
+                    <p><strong>Количество оценок:</strong> ${marker.rating_count}</p>
+                    <h4>Отзывы:</h4>
+                    ${reviewsContent}
+                    <button onclick="openReviewModal(${marker.id})">Оставить отзыв</button>
+                </div>
+            `;
+
+            const infoWindow = new google.maps.InfoWindow({
+                content: infoWindowContent
+            });
+
+            markerObj.addListener('click', () => {
+                infoWindow.open(map, markerObj);
+            });
+        }
     } catch (error) {
         console.error('Ошибка при загрузке меток:', error);
     }
@@ -174,6 +224,10 @@ async function handleAddLocation(event) {
         console.error('Ошибка:', error);
         alert('Произошла ошибка при добавлении локации. Пожалуйста, попробуйте снова.');
     }
+}
+
+function openReviewModal(locationId) {
+    // Реализация функции открытия модального окна для оставления отзыва
 }
 
 window.onclick = function(event) {
