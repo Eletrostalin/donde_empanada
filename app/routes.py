@@ -146,3 +146,33 @@ def reviews(location_id):
         } for review in reviews
     ]
     return jsonify(reviews_list)
+
+@bp.route('/add_review', methods=['POST'])
+@login_required
+def add_review():
+    try:
+        location_id = request.form['location_id']
+        rating = int(request.form['rating'])
+        comment = request.form['comment']
+
+        new_review = Review(
+            user_id=current_user.id,
+            location_id=location_id,
+            rating=rating,
+            comment=comment
+        )
+        db.session.add(new_review)
+        db.session.commit()
+
+        # Обновление среднего рейтинга и количества отзывов
+        location = Location.query.get(location_id)
+        reviews = Review.query.filter_by(location_id=location_id).all()
+        total_ratings = sum([review.rating for review in reviews])
+        location.rating_count = len(reviews)
+        location.average_rating = total_ratings / location.rating_count if location.rating_count else 0
+        db.session.commit()
+
+        return jsonify(success=True, message='Отзыв успешно добавлен!')
+    except Exception as e:
+        app.logger.error(f'Ошибка при добавлении отзыва: {e}')
+        return jsonify(success=False, message=f'Ошибка при добавлении отзыва: {e}')

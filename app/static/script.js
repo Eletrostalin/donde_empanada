@@ -227,7 +227,42 @@ async function handleAddLocation(event) {
 }
 
 function openReviewModal(locationId) {
-    // Реализация функции открытия модального окна для оставления отзыва
+    const reviewModal = document.getElementById('review-modal');
+    reviewModal.style.display = 'block';
+    document.getElementById('review-location-id').value = locationId;
+}
+
+async function handleReviewSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch(form.action, {
+            method: form.method,
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrf_token')
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert(result.message);
+            document.getElementById('review-modal').style.display = 'none';
+            location.reload();  // Перезагрузка страницы для обновления отзывов
+        } else {
+            alert(`Ошибка добавления отзыва: ${result.message}`);
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Произошла ошибка при добавлении отзыва. Пожалуйста, попробуйте снова.');
+    }
+}
+
+function closeReviewModal() {
+    document.getElementById('review-modal').style.display = 'none';
 }
 
 window.onclick = function(event) {
