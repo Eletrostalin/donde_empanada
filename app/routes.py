@@ -134,7 +134,6 @@ def markers():
     app.logger.info('Список меток успешно загружен')
     return jsonify(markers)
 
-
 @bp.route('/reviews/<int:location_id>')
 def reviews(location_id):
     reviews = Review.query.filter_by(location_id=location_id).all()
@@ -147,7 +146,6 @@ def reviews(location_id):
     ]
     return jsonify(reviews_list)
 
-
 @bp.route('/add_review', methods=['POST'])
 @login_required
 def add_review():
@@ -156,6 +154,7 @@ def add_review():
         rating = int(request.form['rating'])
         comment = request.form['comment']
 
+        # Добавление нового отзыва
         new_review = Review(
             user_id=current_user.id,
             location_id=location_id,
@@ -165,7 +164,7 @@ def add_review():
         db.session.add(new_review)
         db.session.commit()
 
-        # Обновление среднего рейтинга и количества отзывов
+        # Обновление средней оценки и количества отзывов
         location = Location.query.get(location_id)
         reviews = Review.query.filter_by(location_id=location_id).all()
         total_ratings = sum([review.rating for review in reviews])
@@ -177,3 +176,4 @@ def add_review():
     except Exception as e:
         app.logger.error(f'Ошибка при добавлении отзыва: {e}')
         return jsonify(success=False, message=f'Ошибка при добавлении отзыва: {e}')
+
