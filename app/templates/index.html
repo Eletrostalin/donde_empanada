@@ -10,6 +10,18 @@
         .login-button, .link {
             cursor: pointer;
         }
+        .custom-alert {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #444;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 1000;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -28,7 +40,7 @@
         {% endif %}
     </div>
     <div id="map"></div>
-    <div class="custom-button-right" id="add-marker" onclick="document.getElementById('add-marker-modal').style.display='block'">
+    <div class="custom-button-right" id="add-marker" onclick="promptLocationSelection()">
         <img src="{{ url_for('static', filename='add.png') }}" alt="Add Marker">
     </div>
     <div class="custom-button-right" id="my-location" style="top: 160px;">
@@ -72,7 +84,7 @@
     <!-- Add Marker Modal -->
     <div id="add-marker-modal" class="modal">
         <div class="modal-content">
-            <form action="{{ url_for('main.add_location') }}" method="post">
+            <form id="add-location-form" action="{{ url_for('main.add_location') }}" method="post" onsubmit="handleAddLocation(event)">
                 {{ form.hidden_tag() }}
                 {{ form.csrf_token }}
                 <input type="text" name="name" placeholder="Название" required>
@@ -94,6 +106,9 @@
             <p id="success-message"></p>
         </div>
     </div>
+
+    <!-- Custom Alert -->
+    <div id="custom-alert" class="custom-alert">Выберите точку на карте</div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script async

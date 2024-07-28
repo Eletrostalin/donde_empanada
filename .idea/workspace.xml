@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e5f4644e-ea72-4fc1-b3d3-5893473f7119" name="Changes" comment="Сделали авторизацию" />
+    <list default="true" id="e5f4644e-ea72-4fc1-b3d3-5893473f7119" name="Changes" comment="Сделали авторизацию, регистрацию" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -38,7 +38,7 @@
     "Python.run.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "9cc10630",
+    "git-widget-placeholder": "26643278",
     "last_opened_file_path": "/Users/nickstanchenkov/donde_empanada4/donde_empanada4/app/templates"
   }
 }]]></component>
@@ -64,6 +64,15 @@
       <option name="presentableId" value="Default" />
       <updated>1721582855674</updated>
     </task>
+    <task id="LOCAL-00001" summary="Сделали авторизацию, регистрацию">
+      <option name="closed" value="true" />
+      <created>1722176109460</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1722176109460</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -76,5 +85,10 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Сделали авторизацию, htubcnhfwb." />
+    <MESSAGE value="Сделали авторизацию, регистрацию" />
+    <option name="LAST_COMMIT_MESSAGE" value="Сделали авторизацию, регистрацию" />
   </component>
 </project>
