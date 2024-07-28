@@ -23,14 +23,10 @@ def register():
 
         if existing_user_by_username:
             message = 'Пользователь с таким именем уже существует. 🚫'
-            flash(message, 'danger')
-            app.logger.warning(message)
             return jsonify(success=False, message=message)
 
         if existing_user_by_phone:
             message = 'Пользователь с таким телефоном уже существует. 🚫'
-            flash(message, 'danger')
-            app.logger.warning(message)
             return jsonify(success=False, message=message)
 
         user = User(
@@ -44,14 +40,10 @@ def register():
         db.session.add(user)
         db.session.commit()
         message = 'Регистрация прошла успешно! 😊'
-        flash(message, 'success')
-        app.logger.info(message)
-        return jsonify(success=True)
+        return jsonify(success=True, message=message)
     else:
         error_messages = [f"{field}: {', '.join(errors)}" for field, errors in form.errors.items()]
         message = f'Ошибка регистрации: {", ".join(error_messages)} 🚫'
-        flash(message, 'danger')
-        app.logger.error(f'Ошибка валидации формы: {form.errors}')
         return jsonify(success=False, message=message)
 
 @bp.route('/login', methods=['POST'])
@@ -64,19 +56,18 @@ def login():
             message = 'Вход выполнен успешно! 😊'
             flash(message, 'success')
             app.logger.info(message)
-            return redirect(url_for('main.index'))
+            return jsonify(success=True, message=message)
         else:
             message = 'Ошибка входа. Проверьте имя пользователя и пароль. 🚫'
             flash(message, 'danger')
             app.logger.warning(message)
             return jsonify(success=False, message=message)
     else:
-        if request.method == 'POST':
-            error_messages = [f"{field}: {', '.join(errors)}" for field, errors in form.errors.items()]
-            message = f'Ошибки валидации формы: {", ".join(error_messages)} 🚫'
-            flash(message, 'danger')
-            app.logger.error(f'Ошибка валидации формы: {form.errors}')
-            return jsonify(success=False, message=message)
+        error_messages = [f"{field}: {', '.join(errors)}" for field, errors in form.errors.items()]
+        message = f'Ошибки валидации формы: {", ".join(error_messages)} 🚫'
+        flash(message, 'danger')
+        app.logger.error(f'Ошибка валидации формы: {form.errors}')
+        return jsonify(success=False, message=message)
 
 @bp.route('/logout')
 @login_required

@@ -1,115 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Map Application</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script>
-        const GOOGLE_MAPS_API_KEY = '{{ google_maps_api_key }}';
-        document.write('<script src="https://maps.googleapis.com/maps/api/js?key=' + GOOGLE_MAPS_API_KEY + '&callback=initMap" async defer><\/script>');
-    </script>
-    <script>
-        let map;
-        function initMap() {
-            const moscow = { lat: 55.7558, lng: 37.6173 };
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: moscow,
-                zoom: 10,
-                disableDefaultUI: true
-            });
-
-            fetchMarkers();
-
-            document.getElementById('add-marker').addEventListener('click', () => {
-                map.addListener('click', (event) => {
-                    showAddMarkerForm(event.latLng);
-                });
-            });
-
-            document.getElementById('my-location').addEventListener('click', () => {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition((position) => {
-                        const pos = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        };
-                        map.setCenter(pos);
-                    });
-                }
-            });
+    <meta name="language" content="ru">
+    <style>
+        .login-button, .link {
+            cursor: pointer;
         }
-
-        function fetchMarkers() {
-            fetch('/markers')
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(marker => {
-                        new google.maps.Marker({
-                            position: { lat: marker.latitude, lng: marker.longitude },
-                            map: map,
-                            title: marker.name
-                        });
-                    });
-                });
-        }
-
-        function showAddMarkerForm(latLng) {
-            const modal = document.getElementById('add-marker-modal');
-            modal.style.display = 'block';
-            document.getElementById('latitude').value = latLng.lat();
-            document.getElementById('longitude').value = latLng.lng();
-        }
-
-        function closeAddMarkerForm() {
-            document.getElementById('add-marker-modal').style.display = 'none';
-        }
-
-        function closeLoginForm() {
-            document.getElementById('login-modal').style.display = 'none';
-        }
-
-        function closeRegistrationForm() {
-            document.getElementById('registration-modal').style.display = 'none';
-        }
-
-        function toggleDropdown() {
-            const dropdown = document.getElementById('user-dropdown');
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        }
-
-        window.onclick = function(event) {
-            if (!event.target.matches('.dropdown-toggle')) {
-                const dropdowns = document.getElementsByClassName('dropdown-content');
-                for (let i = 0; i < dropdowns.length; i++) {
-                    const openDropdown = dropdowns[i];
-                    if (openDropdown.style.display === 'block') {
-                        openDropdown.style.display = 'none';
-                    }
-                }
-            }
-        }
-
-        function handleLogin(event) {
-            event.preventDefault();
-            const form = event.target;
-            const formData = new FormData(form);
-
-            fetch(form.action, {
-                method: form.method,
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.reload();
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => console.error('Ошибка:', error));
-        }
-    </script>
+    </style>
 </head>
 <body>
     <div class="header">
@@ -127,7 +28,7 @@
         {% endif %}
     </div>
     <div id="map"></div>
-    <div class="custom-button-right" id="add-marker">
+    <div class="custom-button-right" id="add-marker" onclick="document.getElementById('add-marker-modal').style.display='block'">
         <img src="{{ url_for('static', filename='add.png') }}" alt="Add Marker">
     </div>
     <div class="custom-button-right" id="my-location" style="top: 160px;">
@@ -137,13 +38,14 @@
     <!-- Login Modal -->
     <div id="login-modal" class="modal">
         <div class="modal-content">
-            <form action="{{ url_for('main.login') }}" method="post" onsubmit="handleLogin(event)">
+            <form id="login-form" action="{{ url_for('main.login') }}" method="post" onsubmit="handleLogin(event)">
                 {{ form.hidden_tag() }}
+                {{ form.csrf_token }}
                 <input type="text" name="username" placeholder="Имя пользователя" required>
                 <input type="password" name="password" placeholder="Пароль" required>
                 <button type="submit">Войти</button>
                 <button type="button" onclick="closeLoginForm()">Отмена</button>
-                <div onclick="document.getElementById('registration-modal').style.display='block'; closeLoginForm();">Нет аккаунта?</div>
+                <div class="link" onclick="showRegistrationForm()">Нет аккаунта?</div>
             </form>
         </div>
     </div>
@@ -151,8 +53,9 @@
     <!-- Registration Modal -->
     <div id="registration-modal" class="modal">
         <div class="modal-content">
-            <form action="{{ url_for('main.register') }}" method="post">
+            <form id="registration-form" action="{{ url_for('main.register') }}" method="post" onsubmit="handleRegistration(event)">
                 {{ form.hidden_tag() }}
+                {{ form.csrf_token }}
                 <input type="text" name="username" placeholder="Имя пользователя" required>
                 <input type="text" name="first_name" placeholder="Имя" required>
                 <input type="text" name="second_name" placeholder="Фамилия" required>
@@ -171,6 +74,7 @@
         <div class="modal-content">
             <form action="{{ url_for('main.add_location') }}" method="post">
                 {{ form.hidden_tag() }}
+                {{ form.csrf_token }}
                 <input type="text" name="name" placeholder="Название" required>
                 <input type="text" name="description" placeholder="Описание" required>
                 <input type="text" name="address" placeholder="Адрес" required>
@@ -183,5 +87,16 @@
             </form>
         </div>
     </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <p id="success-message"></p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script async
+        src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap"></script>
 </body>
 </html>
