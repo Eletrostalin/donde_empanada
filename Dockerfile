@@ -14,5 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Копируем все файлы проекта в рабочую директорию
 COPY . /app/
 
+EXPOSE 5000
+
 CMD ["python", "app.py"]
 
