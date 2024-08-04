@@ -1,6 +1,8 @@
-let map;
-let selectedLatLng;
+// script.js
+
 let isAddingMarker = false;
+let selectedLatLng = null;
+let map;
 
 function toggleDropdown() {
     const dropdown = document.getElementById('user-dropdown');
@@ -24,7 +26,7 @@ async function handleLogin(event) {
         const result = await response.json();
 
         if (result.success) {
-            location.reload(); // Перезагрузка страницы для обновления состояния авторизации
+            location.reload();
         } else {
             alert(`Ошибка входа: ${result.message}`);
         }
@@ -51,10 +53,10 @@ async function handleRegistration(event) {
         const result = await response.json();
 
         if (result.success) {
-            showSuccessModal(result.message);  // Показать сообщение об успехе
+            showSuccessModal(result.message);
             setTimeout(() => {
                 document.getElementById('success-modal').style.display = 'none';
-                location.reload();  // Перезагрузка страницы через 2 секунды
+                location.reload();
             }, 1500);
         } else {
             alert(`Ошибка регистрации: ${result.message}`);
@@ -84,24 +86,35 @@ function closeAddMarkerForm() {
     document.getElementById('add-marker-modal').style.display = 'none';
 }
 
+function closeOwnerInfoForm() {
+    document.getElementById('owner-info-modal').style.display = 'none';
+}
+
 function showRegistrationForm() {
     document.getElementById('login-modal').style.display = 'none';
     document.getElementById('registration-modal').style.display = 'block';
+}
+
+function showOwnerInfoForm() {
+    document.getElementById('owner-info-modal').style.display = 'block';
+    document.getElementById('add-marker-modal').style.display = 'none';
+    document.getElementById('location_id').value = selectedLatLng ? selectedLatLng.latLng : null;  // Передаем ID локации
 }
 
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
         center: { lat: 55.7558, lng: 37.6176 },
         zoom: 8,
-        disableDefaultUI: true,  // Отключаем все кнопки
-        zoomControl: true  // Включаем только управление зумом
+        disableDefaultUI: true
     });
 
     fetchMarkers(map);
 
     map.addListener('click', function(event) {
+        console.log('Клик на карту', event.latLng.toString());
         if (isAddingMarker) {
             selectedLatLng = event.latLng;
+            console.log('Координаты добавления:', selectedLatLng.toString());
             document.getElementById('add-marker-modal').style.display = 'block';
             document.getElementById('latitude').value = selectedLatLng.lat();
             document.getElementById('longitude').value = selectedLatLng.lng();
@@ -111,11 +124,7 @@ function initMap() {
 }
 
 function promptLocationSelection() {
-    const alert = document.getElementById('custom-alert');
-    alert.style.display = 'block';
-    setTimeout(() => {
-        alert.style.display = 'none';
-    }, 3000);
+    console.log('Режим добавления метки активирован');
     isAddingMarker = true;
 }
 
@@ -133,7 +142,8 @@ async function fetchMarkers(map) {
             const markerObj = new google.maps.Marker({
                 position: { lat: marker.latitude, lng: marker.longitude },
                 map: map,
-                title: marker.name
+                title: marker.name,
+                icon: getMarkerIcon(marker.average_rating)
             });
 
             let reviewsContent = '';
@@ -169,7 +179,7 @@ async function fetchMarkers(map) {
                     <p><strong>Количество оценок:</strong> ${marker.rating_count}</p>
                     <h4>Отзывы:</h4>
                     ${reviewsContent}
-                    <button onclick="openReviewModal(${marker.id})">Оставить отзыв</button>
+                    <button class="btn btn-primary mt-2" onclick="openReviewModal(${marker.id})">Оставить отзыв</button>
                 </div>
             `;
 
@@ -183,6 +193,21 @@ async function fetchMarkers(map) {
         }
     } catch (error) {
         console.error('Ошибка при загрузке меток:', error);
+    }
+}
+
+function getMarkerIcon(averageRating) {
+    const size = new google.maps.Size(40, 40);
+    if (averageRating < 1) {
+        return { url: '/static/1.png', scaledSize: size };
+    } else if (averageRating < 2) {
+        return { url: '/static/2.png', scaledSize: size };
+    } else if (averageRating < 3) {
+        return { url: '/static/3.png', scaledSize: size };
+    } else if (averageRating < 4) {
+        return { url: '/static/4.png', scaledSize: size };
+    } else {
+        return { url: '/static/5.png', scaledSize: size };
     }
 }
 
@@ -211,10 +236,10 @@ async function handleAddLocation(event) {
         const result = await response.json();
 
         if (result.success) {
-            showSuccessModal(result.message);  // Показать сообщение об успехе
+            showSuccessModal(result.message);
             setTimeout(() => {
                 document.getElementById('success-modal').style.display = 'none';
-                location.reload();  // Перезагрузка страницы через 2 секунды
+                location.reload();
             }, 2000);
         } else {
             console.error(`Ошибка добавления локации: ${result.message}`);
@@ -223,6 +248,35 @@ async function handleAddLocation(event) {
     } catch (error) {
         console.error('Ошибка:', error);
         alert('Произошла ошибка при добавлении локации. Пожалуйста, попробуйте снова.');
+    }
+}
+
+async function handleOwnerInfoSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch(form.action, {
+            method: form.method,
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrf_token')
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert(result.message);
+            document.getElementById('owner-info-modal').style.display = 'none';
+            location.reload();  // Перезагрузка страницы для обновления информации
+        } else {
+            alert(`Ошибка добавления информации: ${result.message}`);
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Произошла ошибка при добавлении информации. Пожалуйста, попробуйте снова.');
     }
 }
 
@@ -251,7 +305,7 @@ async function handleReviewSubmit(event) {
         if (result.success) {
             alert(result.message);
             document.getElementById('review-modal').style.display = 'none';
-            location.reload();  // Перезагрузка страницы для обновления отзывов
+            location.reload();
         } else {
             alert(`Ошибка добавления отзыва: ${result.message}`);
         }
@@ -265,8 +319,38 @@ function closeReviewModal() {
     document.getElementById('review-modal').style.display = 'none';
 }
 
+function locateMe() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            const pos = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+            map.setCenter(pos);
+            map.setZoom(14);
+            new google.maps.Marker({
+                position: pos,
+                map: map,
+                title: 'Вы здесь'
+            });
+        }, () => {
+            alert('Ошибка при определении местоположения.');
+        });
+    } else {
+        alert('Геолокация не поддерживается вашим браузером.');
+    }
+}
+
+function zoomIn() {
+    map.setZoom(map.getZoom() + 1);
+}
+
+function zoomOut() {
+    map.setZoom(map.getZoom() - 1);
+}
+
 window.onclick = function(event) {
-    const modals = ['login-modal', 'registration-modal', 'add-marker-modal', 'success-modal'];
+    const modals = ['login-modal', 'registration-modal', 'add-marker-modal', 'owner-info-modal', 'review-modal', 'success-modal'];
     modals.forEach(function(modal) {
         if (event.target == document.getElementById(modal)) {
             document.getElementById(modal).style.display = "none";

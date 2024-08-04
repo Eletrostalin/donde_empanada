@@ -1,3 +1,5 @@
+# models.py
+
 from datetime import datetime
 from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -11,8 +13,6 @@ class User(db.Model, UserMixin):
     first_name = db.Column(db.String(150), nullable=False)
     second_name = db.Column(db.String(150), nullable=False)
     phone_hash = db.Column(db.String(256), unique=True, nullable=False)
-
-    reviews = db.relationship('Review', backref='user', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -41,6 +41,7 @@ class Location(db.Model):
     average_check = db.Column(db.Integer, nullable=True)
 
     reviews = db.relationship('Review', backref='location', lazy=True)
+    owner_info = db.relationship('OwnerInfo', backref='location', uselist=False)  # Связь с OwnerInfo
 
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -50,5 +51,19 @@ class Review(db.Model):
     comment = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    user = db.relationship('User', backref='reviews', lazy=True)
+
     def __repr__(self):
         return f'<Review {self.rating}>'
+
+class OwnerInfo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=False)
+    website = db.Column(db.String(200), nullable=True)
+    owner_info = db.Column(db.Text, nullable=False)
+
+    user = db.relationship('User', backref='owner_info', lazy=True)
+
+    def __repr__(self):
+        return f'<OwnerInfo {self.id}>'

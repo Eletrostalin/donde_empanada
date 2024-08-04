@@ -1,13 +1,18 @@
+/* Основной фон страницы */
 body, html {
     height: 100%;
     margin: 0;
-    font-family: Arial, sans-serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: #f4f4f9;
+    font-size: 14px; /* Уменьшение размера шрифта */
 }
 
+/* Стили для карты */
 #map {
     height: 100%;
 }
 
+/* Шапка */
 .header {
     position: absolute;
     top: 30px;
@@ -16,7 +21,7 @@ body, html {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(255, 255, 255, 0.8);
+    background: #ffffff;
     z-index: 2;
     border-radius: 24px;
     padding: 0 20px;
@@ -25,23 +30,25 @@ body, html {
 
 .header img {
     height: 50px;
-}
-
-.header .login-button {
     cursor: pointer;
 }
 
-.custom-button {
-    position: absolute;
-    top: 100px;
-    left: 50px;
-    z-index: 2;
+.login-button {
+    cursor: pointer;
+    color: #dd362f; /* rgb(221, 54, 47) */
 }
 
-.custom-button img {
-    width: 50px;
-    height: 50px;
+.login-button:hover {
+    color: #fca711; /* rgb(252, 167, 17) */
+}
+
+.link {
     cursor: pointer;
+    color: #dd362f; /* rgb(221, 54, 47) */
+}
+
+.link:hover {
+    color: #fca711; /* rgb(252, 167, 17) */
 }
 
 .custom-button-right {
@@ -52,9 +59,10 @@ body, html {
 }
 
 .custom-button-right img {
-    width: 50px;
-    height: 50px;
+    width: 40px; /* уменьшено на 20% */
+    height: 40px; /* уменьшено на 20% */
     cursor: pointer;
+    border-radius: 12px; /* скругление углов */
 }
 
 .modal {
@@ -66,42 +74,60 @@ body, html {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgb(0, 0, 0);
     background-color: rgba(0, 0, 0, 0.4);
 }
 
 .modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
+    background-color: #ffffff;
+    margin: auto;
+    padding: 18px; /* Уменьшение padding */
     border: 1px solid #888;
-    width: 300px;
+    width: 30%; /* Ширина 30% экрана */
     border-radius: 10px;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+
 }
 
-.modal-content input, .modal-content button {
+.modal-content .form-group {
+    margin-bottom: 8px; /* Уменьшение отступов */
+}
+
+.modal-content label {
+    margin-bottom: 4px; /* Уменьшение отступов */
+    font-weight: bold;
+    color: #dd362f; /* rgb(221, 54, 47) */
+}
+
+.modal-content input, .modal-content select, .modal-content textarea, .modal-content button {
     display: block;
     width: 100%;
-    margin-bottom: 10px;
+    padding: 8px; /* Уменьшение отступов */
+    margin-bottom: 8px; /* Уменьшение отступов */
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 12px; /* Уменьшение размера шрифта */
 }
 
-.dropdown {
-    position: relative;
-    display: inline-block;
+.modal-content button.btn-primary {
+    background-color: #dd362f; /* rgb(221, 54, 47) */
+    border: none;
+    color: #fff;
 }
 
-.dropdown-toggle {
-    cursor: pointer;
+.modal-content button.btn-primary:hover {
+    background-color: #fca711; /* rgb(252, 167, 17) */
 }
 
-.dropdown-content {
-    display: none;
-    position: absolute;
-    right: 0;
-    background-color: #f9f9f9;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
+.modal-content button.btn-secondary {
+    background-color: #f4f4f9;
+    border: 1px solid #ddd;
+    color: #000;
+}
+
+.modal-content button.btn-secondary:hover {
+    background-color: #ddd;
 }
 
 .dropdown-content a {
@@ -113,4 +139,21 @@ body, html {
 
 .dropdown-content a:hover {
     background-color: #f1f1f1;
+}
+
+#zoom-controls {
+    position: absolute;
+    bottom: 150px;
+    right: 50px;
+    z-index: 2;
+}
+
+#zoom-controls div {
+    margin-bottom: 10px;
+}
+
+.centered-form {
+    width: 90%; /* Уменьшение ширины до 90% */
+    max-width: 400px; /* Максимальная ширина формы */
+    font-size: 14px;
 }

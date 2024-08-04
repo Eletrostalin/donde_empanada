@@ -1,7 +1,9 @@
+# routes.py
+
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app as app
 from flask_login import login_user, logout_user, current_user, login_required
-from .models import db, User, Location, Review
-from .forms import RegistrationForm, LoginForm, LocationForm
+from .models import db, User, Location, Review, OwnerInfo
+from .forms import RegistrationForm, LoginForm, LocationForm, OwnerInfoForm
 import logging
 import os
 
@@ -10,10 +12,20 @@ bp = Blueprint('main', __name__)
 @bp.route('/')
 def index():
     app.logger.info('Загрузка главной страницы')
-    form = RegistrationForm()
+    # Инициализация всех необходимых форм
+    registration_form = RegistrationForm()
+    login_form = LoginForm()
+    location_form = LocationForm()
+    owner_info_form = OwnerInfoForm()
     google_maps_api_key = os.getenv('GOOGLE_MAPS_API_KEY')
-    return render_template('index.html', form=form, google_maps_api_key=google_maps_api_key)
 
+    # Передача всех форм в шаблон
+    return render_template('index.html',
+                           registration_form=registration_form,
+                           login_form=login_form,
+                           location_form=location_form,
+                           owner_info_form=owner_info_form,
+                           google_maps_api_key=google_maps_api_key)
 @bp.route('/register', methods=['POST'])
 def register():
     form = RegistrationForm()
@@ -103,9 +115,37 @@ def add_location():
             db.session.commit()
             message = 'Метка успешно добавлена в базу данных! 😊'
             app.logger.info(message)
-            return jsonify(success=True)
+            return jsonify(success=True, message=message)
         except Exception as e:
             message = f'Произошла ошибка при добавлении метки: {e} 🚫'
+            app.logger.error(message)
+            return jsonify(success=False, message=message)
+    else:
+        error_messages = [f"{field}: {', '.join(errors)}" for field, errors in form.errors.items()]
+        message = f'Ошибки валидации формы: {", ".join(error_messages)} 🚫'
+        app.logger.error(f'Ошибка валидации формы: {form.errors}')
+        return jsonify(success=False, message=message)
+
+@bp.route('/add_owner_info', methods=['POST'])
+@login_required
+def add_owner_info():
+    form = OwnerInfoForm()
+    if form.validate_on_submit():
+        try:
+            location_id = request.form['location_id']
+            new_owner_info = OwnerInfo(
+                user_id=current_user.id,
+                location_id=location_id,
+                website=form.website.data,
+                owner_info=form.owner_info.data
+            )
+            db.session.add(new_owner_info)
+            db.session.commit()
+            message = 'Информация о владельце успешно добавлена в базу данных! 😊'
+            app.logger.info(message)
+            return jsonify(success=True, message=message)
+        except Exception as e:
+            message = f'Произошла ошибка при добавлении информации: {e} 🚫'
             app.logger.error(message)
             return jsonify(success=False, message=message)
     else:
@@ -120,7 +160,7 @@ def markers():
     markers = []
     for location in locations:
         markers.append({
-            'id': location.id,  # Убедитесь, что id включен
+            'id': location.id,
             'name': location.name,
             'description': location.description,
             'latitude': location.latitude,
@@ -139,7 +179,7 @@ def reviews(location_id):
     reviews = Review.query.filter_by(location_id=location_id).all()
     reviews_list = [
         {
-            'user_name': review.user.username,  # Использование отношения для получения имени пользователя
+            'user_name': review.user.username,
             'comment': review.comment,
             'rating': review.rating
         } for review in reviews
@@ -154,7 +194,6 @@ def add_review():
         rating = int(request.form['rating'])
         comment = request.form['comment']
 
-        # Добавление нового отзыва
         new_review = Review(
             user_id=current_user.id,
             location_id=location_id,
@@ -164,7 +203,6 @@ def add_review():
         db.session.add(new_review)
         db.session.commit()
 
-        # Обновление средней оценки и количества отзывов
         location = Location.query.get(location_id)
         reviews = Review.query.filter_by(location_id=location_id).all()
         total_ratings = sum([review.rating for review in reviews])
@@ -176,4 +214,3 @@ def add_review():
     except Exception as e:
         app.logger.error(f'Ошибка при добавлении отзыва: {e}')
         return jsonify(success=False, message=f'Ошибка при добавлении отзыва: {e}')
-

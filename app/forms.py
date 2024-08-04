@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, IntegerField, TextAreaField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError, Optional
+from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError, Optional, NumberRange
 import re
 
 def validate_username(form, field):
@@ -14,6 +14,11 @@ def validate_name(form, field):
 def validate_phone(form, field):
     if not re.match(r'^[0-9]+$', field.data):
         raise ValidationError('Телефон должен содержать только цифры.')
+
+# Новый валидатор для часов работы
+def validate_working_hours(form, field):
+    if not re.match(r'^\d{2}:\d{2} - \d{2}:\d{2}$', field.data):
+        raise ValidationError('Время работы должно быть в формате xx:xx - xx:xx.')
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(message="Поле не может быть пустым"), validate_username])
@@ -43,11 +48,18 @@ class LocationForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
     address = StringField('Address', validators=[DataRequired()])
-    working_hours = StringField('Working Hours', validators=[DataRequired()])
-    average_check = IntegerField('Average Check', validators=[DataRequired()])  # Изменение типа на Integer
-    submit = SubmitField('Add Location')
+    working_hours = StringField('Working Hours', validators=[DataRequired(), validate_working_hours])
+    average_check = IntegerField('Average Check', validators=[DataRequired(), NumberRange(min=2000, max=5000)])  # Установка диапазона
+    submit_add = SubmitField('Добавить')  # Кнопка для добавления
+    submit_cancel = SubmitField('Отмена')  # Кнопка для отмены
+    submit_owner = SubmitField('Я хозяин')  # Кнопка для открытия доп. формы
 
 class ReviewForm(FlaskForm):
     rating = IntegerField('Rating', validators=[DataRequired()])
     comment = TextAreaField('Comment', validators=[DataRequired()])
     submit = SubmitField('Add Review')
+
+class OwnerInfoForm(FlaskForm):
+    website = StringField('Website', validators=[Optional(), Length(max=200), Email(message='Введите корректный URL')])
+    owner_info = TextAreaField('Info About You and Your Establishment', validators=[DataRequired(), Length(max=500)])
+    submit = SubmitField('Отправить')  # Кнопка для отправки информации

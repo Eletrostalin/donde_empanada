@@ -5,46 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Map Application</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <meta name="language" content="ru">
-    <style>
-        .login-button, .link {
-            cursor: pointer;
-        }
-    </style>
 </head>
+
 <body>
     <div class="header">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" onclick="location.reload()">
         {% if current_user.is_authenticated %}
-            <div class="dropdown">
-                <img src="{{ url_for('static', filename='profile.png') }}" alt="Profile" class="dropdown-toggle" onclick="toggleDropdown()">
-                <div id="user-dropdown" class="dropdown-content">
-                    <a href="#">Аккаунт</a>
-                    <a href="{{ url_for('main.logout') }}">Выйти</a>
-                </div>
+        <div class="dropdown">
+            <img src="{{ url_for('static', filename='profile.png') }}" alt="Profile" class="dropdown-toggle" id="profileDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <div class="dropdown-menu" aria-labelledby="profileDropdown">
+                <a class="dropdown-item" href="#">Аккаунт</a>
+                <a class="dropdown-item" href="#">Настройки</a>
+                <a class="dropdown-item" href="{{ url_for('main.logout') }}">Выйти</a>
             </div>
+        </div>
         {% else %}
-            <div class="login-button" onclick="document.getElementById('login-modal').style.display='block'">Войти</div>
+        <div class="login-button" onclick="document.getElementById('login-modal').style.display='block'">Войти</div>
         {% endif %}
     </div>
     <div id="map"></div>
-    <div class="custom-button-right" id="add-marker" onclick="document.getElementById('add-marker-modal').style.display='block'">
+    {% if current_user.is_authenticated %}
+    <div class="custom-button-right" id="add-marker" onclick="promptLocationSelection()">
         <img src="{{ url_for('static', filename='add.png') }}" alt="Add Marker">
     </div>
-    <div class="custom-button-right" id="my-location" style="top: 160px;">
+    {% endif %}
+    <div class="custom-button-right" id="my-location" style="margin-top: 170px !important;" onclick="locateMe()">
         <img src="{{ url_for('static', filename='location.png') }}" alt="My Location">
+    </div>
+    <div class="custom-button-right" id="zoom-controls" style="top: 350px !important;">
+        <div onclick="zoomIn()">
+            <img src="{{ url_for('static', filename='zoom_in.png') }}" alt="Zoom In">
+        </div>
+        <div onclick="zoomOut()">
+            <img src="{{ url_for('static', filename='zoom_out.png') }}" alt="Zoom Out">
+        </div>
     </div>
 
     <!-- Login Modal -->
     <div id="login-modal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content centered-form">
             <form id="login-form" action="{{ url_for('main.login') }}" method="post" onsubmit="handleLogin(event)">
-                {{ form.hidden_tag() }}
-                {{ form.csrf_token }}
-                <input type="text" name="username" placeholder="Имя пользователя" required>
-                <input type="password" name="password" placeholder="Пароль" required>
-                <button type="submit">Войти</button>
-                <button type="button" onclick="closeLoginForm()">Отмена</button>
+                {{ login_form.hidden_tag() }}
+                {{ login_form.csrf_token }}
+                <div class="form-group">
+                    <label for="username">Имя пользователя</label>
+                    <input type="text" class="form-control" name="username" placeholder="Имя пользователя" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" class="form-control" name="password" placeholder="Пароль" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Войти</button>
+                <button type="button" class="btn btn-secondary" onclick="closeLoginForm()">Отмена</button>
                 <div class="link" onclick="showRegistrationForm()">Нет аккаунта?</div>
             </form>
         </div>
@@ -52,74 +66,99 @@
 
     <!-- Registration Modal -->
     <div id="registration-modal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content centered-form">
             <form id="registration-form" action="{{ url_for('main.register') }}" method="post" onsubmit="handleRegistration(event)">
-                {{ form.hidden_tag() }}
-                {{ form.csrf_token }}
-                <input type="text" name="username" placeholder="Имя пользователя" required>
-                <input type="text" name="first_name" placeholder="Имя" required>
-                <input type="text" name="second_name" placeholder="Фамилия" required>
-                <input type="email" name="email" placeholder="Электронная почта" required>
-                <input type="text" name="phone" placeholder="Телефон" required>
-                <input type="password" name="password" placeholder="Пароль" required>
-                <input type="password" name="confirm_password" placeholder="Повторите пароль" required>
-                <button type="submit">Зарегистрироваться</button>
-                <button type="button" onclick="closeRegistrationForm()">Отмена</button>
+                {{ registration_form.hidden_tag() }}
+                {{ registration_form.csrf_token }}
+                <div class="form-group">
+                    <label for="username">Имя пользователя</label>
+                    <input type="text" class="form-control" name="username" placeholder="Имя пользователя" required>
+                </div>
+                <div class="form-group">
+                    <label for="first_name">Имя</label>
+                    <input type="text" class="form-control" name="first_name" placeholder="Имя" required>
+                </div>
+                <div class="form-group">
+                    <label for="second_name">Фамилия</label>
+                    <input type="text" class="form-control" name="second_name" placeholder="Фамилия" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Электронная почта</label>
+                    <input type="email" class="form-control" name="email" placeholder="Электронная почта" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Телефон</label>
+                    <input type="text" class="form-control" name="phone" placeholder="Телефон" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" class="form-control" name="password" placeholder="Пароль" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Повторите пароль</label>
+                    <input type="password" class="form-control" name="confirm_password" placeholder="Повторите пароль" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+                <button type="button" class="btn btn-secondary" onclick="closeRegistrationForm()">Отмена</button>
             </form>
         </div>
     </div>
 
     <!-- Add Marker Modal -->
     <div id="add-marker-modal" class="modal">
-        <div class="modal-content">
-            <form action="{{ url_for('main.add_location') }}" method="post">
-                {{ form.hidden_tag() }}
-                {{ form.csrf_token }}
-                <input type="text" name="name" placeholder="Название" required>
-                <input type="text" name="description" placeholder="Описание" required>
-                <input type="text" name="address" placeholder="Адрес" required>
-                <input type="text" name="working_hours" placeholder="Часы работы" required>
-                <input type="number" name="average_check" placeholder="Средний чек" required>
-                <input type="hidden" name="latitude" id="latitude">
-                <input type="hidden" name="longitude" id="longitude">
-                <button type="submit">Добавить</button>
-                <button type="button" onclick="closeAddMarkerForm()">Отмена</button>
+        <div class="modal-content centered-form">
+            <form id="add-marker-form" action="{{ url_for('main.add_location') }}" method="post" onsubmit="handleAddLocation(event)">
+                {{ location_form.hidden_tag() }}
+                {{ location_form.csrf_token }}
+                <div class="form-group">
+                    <label for="name">Название</label>
+                    <input type="text" class="form-control" name="name" placeholder="Название (не более 30 символов)" maxlength="30" required>
+                </div>
+                <div class="form-group">
+                    <label for="address">Адрес</label>
+                    <input type="text" class="form-control" name="address" placeholder="Адрес (до 150 символов)" maxlength="150">
+                </div>
+                <div class="form-group">
+                    <label for="average_check">Цена за эмпанадос</label>
+                    <input type="number" class="form-control" name="average_check" placeholder="Цена (2000 - 5000)" min="2000" max="5000" required>
+                </div>
+                <div class="form-group">
+                    <label for="working_hours">Часы работы</label>
+                    <input type="text" class="form-control" name="working_hours" placeholder="Часы работы (например, 9:00 - 18:00)" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Добавить</button>
+                <button type="button" class="btn btn-secondary" onclick="closeAddMarkerForm()">Отмена</button>
+                <button type="button" class="btn btn-info" onclick="document.getElementById('owner-info-modal').style.display='block'">Я хозяин</button>
             </form>
         </div>
     </div>
 
-    <!-- Review Modal -->
-    <div id="review-modal" class="modal">
-        <div class="modal-content">
-            <form id="review-form" action="{{ url_for('main.add_review') }}" method="post" onsubmit="handleReviewSubmit(event)">
-                {{ form.hidden_tag() }}
-                {{ form.csrf_token }}
-                <input type="hidden" name="location_id" id="review-location-id">
-                <label for="rating">Оценка:</label>
-                <select name="rating" id="rating" required>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                </select>
-                <label for="comment">Комментарий:</label>
-                <textarea name="comment" id="comment" rows="4" required></textarea>
-                <button type="submit">Отправить</button>
-                <button type="button" onclick="closeReviewModal()">Отмена</button>
+    <!-- Owner Info Modal -->
+    <div id="owner-info-modal" class="modal">
+        <div class="modal-content centered-form">
+            <form id="owner-info-form" action="{{ url_for('main.add_owner_info') }}" method="post" onsubmit="handleOwnerInfoSubmit(event)">
+                {{ owner_info_form.hidden_tag() }}
+                {{ owner_info_form.csrf_token }}
+                <div class="form-group">
+                    <label for="website">Веб-сайт</label>
+                    <input type="url" class="form-control" name="website" placeholder="URL сайта (до 200 символов)" maxlength="200">
+                </div>
+                <div class="form-group">
+                    <label for="owner_info">Информация о вас и вашем заведении</label>
+                    <textarea name="owner_info" class="form-control" rows="4" required></textarea>
+                </div>
+                <input type="hidden" name="location_id" id="location_id">
+                <button type="submit" class="btn btn-primary">Отправить</button>
+                <button type="button" class="btn btn-secondary" onclick="closeOwnerInfoForm()">Отмена</button>
             </form>
         </div>
     </div>
 
-    <!-- Success Modal -->
-    <div id="success-modal" class="modal">
-        <div class="modal-content">
-            <p id="success-message"></p>
-        </div>
-    </div>
-
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-    <script async
-        src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap"></script>
+    <script async src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap"></script>
 </body>
+
 </html>
