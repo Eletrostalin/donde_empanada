@@ -7,6 +7,8 @@ import logging
 from logging import StreamHandler
 import os
 import psycopg2
+from sqlalchemy.engine import make_url
+
 from config import Config
 
 # Инициализация расширений
@@ -35,34 +37,49 @@ def apply_pending_migrations(app):
     # Фильтруем новые миграции
     new_migrations = [f for f in migration_files if f not in applied_migrations]
 
-    # Подключаемся к базе данных
-    conn = psycopg2.connect(
-        dbname=Config.DB_NAME,
-        user=Config.DB_USER,
-        password=Config.DB_PASSWORD,
-        host=Config.DB_HOST,
-        port=Config.DB_PORT
-    )
-    cursor = conn.cursor()
+    if not new_migrations:
+        app.logger.info('Нет новых миграций для применения.')
+        return
 
-    for migration_file in new_migrations:
-        # Применяем каждую новую миграцию
-        with open(os.path.join(migration_folder, migration_file), 'r') as file:
-            migration_sql = file.read()
-            cursor.execute(migration_sql)
-            conn.commit()
-            app.logger.info(f'Миграция {migration_file} применена.')
+    # Парсим DATABASE_URL
+    url = make_url(app.config['SQLALCHEMY_DATABASE_URI'])
 
-        # Добавляем файл миграции в список применённых
-        applied_migrations.append(migration_file)
+    try:
+        # Подключаемся к базе данных
+        conn = psycopg2.connect(
+            dbname=url.database,
+            user=url.username,
+            password=url.password,
+            host=url.host,
+            port=url.port
+        )
+        cursor = conn.cursor()
 
-    # Обновляем список применённых миграций
-    with open(migration_list_file, 'w') as file:
-        for migration in applied_migrations:
-            file.write(migration + '\n')
+        for migration_file in new_migrations:
+            # Применяем каждую новую миграцию
+            with open(os.path.join(migration_folder, migration_file), 'r') as file:
+                migration_sql = file.read()
+                cursor.execute(migration_sql)
+                conn.commit()
+                app.logger.info(f'Миграция {migration_file} применена.')
 
-    cursor.close()
-    conn.close()
+            # Добавляем файл миграции в список применённых
+            applied_migrations.append(migration_file)
+
+        # Обновляем список применённых миграций
+        with open(migration_list_file, 'w') as file:
+            for migration in applied_migrations:
+                file.write(migration + '\n')
+
+        cursor.close()
+        conn.close()
+
+    except Exception as e:
+        app.logger.error(f'Ошибка при применении миграций: {e}')
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
 
 def create_app():
     app = Flask(__name__)
