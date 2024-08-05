@@ -16,5 +16,5 @@ COPY . /app/
 
 EXPOSE 5000
 
-CMD ["python", "run.py"]
+CMD ["python","alembic upgrade head", "run.py"]
 

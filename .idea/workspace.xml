@@ -4,28 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e5f4644e-ea72-4fc1-b3d3-5893473f7119" name="Changes" comment="Переходим к фронтенду">
-      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/static/1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/static/2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/static/3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/static/4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/static/5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/static/zoom_in.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/static/zoom_out.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/location.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/location.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/marker.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/marker.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/profile.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/profile.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/script.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/script.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-    </list>
+    <list default="true" id="e5f4644e-ea72-4fc1-b3d3-5893473f7119" name="Changes" comment="Тестим алембик2" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -53,23 +32,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;Python.config.executor&quot;: &quot;Run&quot;,
-    &quot;Python.run.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;1418c8fa&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/nickstanchenkov/donde_empanada4/donde_empanada4/app/templates&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Python.__init__.executor": "Run",
+    "Python.config.executor": "Run",
+    "Python.run.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "6a5992e2",
+    "last_opened_file_path": "/Users/nickstanchenkov/donde_empanada4/donde_empanada4/app/templates"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/app/templates" />
       <recent name="$PROJECT_DIR$/app" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/app" />
+      <recent name="$PROJECT_DIR$/migrations" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/app/static" />
     </key>
@@ -138,7 +120,55 @@
       <option name="project" value="LOCAL" />
       <updated>1722198538201</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Комит перед заливом">
+      <option name="closed" value="true" />
+      <created>1722776303177</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1722776303177</updated>
+    </task>
+    <task id="LOCAL-00008" summary="EXPOSE 5000">
+      <option name="closed" value="true" />
+      <created>1722778390989</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1722778390989</updated>
+    </task>
+    <task id="LOCAL-00009" summary="EXPOSE 5000&#10;и чуть изменили миграции бд">
+      <option name="closed" value="true" />
+      <created>1722780737892</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1722780737892</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Тестим алембик">
+      <option name="closed" value="true" />
+      <created>1722788286108</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1722788286108</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Тестим алембик">
+      <option name="closed" value="true" />
+      <created>1722788737431</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1722788737431</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Тестим алембик2">
+      <option name="closed" value="true" />
+      <created>1722788766614</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1722788766614</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -159,6 +189,11 @@
     <MESSAGE value="Добавили вызов отзыва" />
     <MESSAGE value="Добавляем вывод средней оценки" />
     <MESSAGE value="Переходим к фронтенду" />
-    <option name="LAST_COMMIT_MESSAGE" value="Переходим к фронтенду" />
+    <MESSAGE value="Комит перед заливом" />
+    <MESSAGE value="EXPOSE 5000" />
+    <MESSAGE value="EXPOSE 5000&#10;и чуть изменили миграции бд" />
+    <MESSAGE value="Тестим алембик" />
+    <MESSAGE value="Тестим алембик2" />
+    <option name="LAST_COMMIT_MESSAGE" value="Тестим алембик2" />
   </component>
 </project>
