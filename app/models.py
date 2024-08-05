@@ -65,5 +65,13 @@ class OwnerInfo(db.Model):
 
     user = db.relationship('User', backref='owner_info', lazy=True)
 
+class Migration(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    migration_name = db.Column(db.String(255), nullable=False, unique=True)
+    applied_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Migration {self.migration_name} applied at {self.applied_at}>'
+
     def __repr__(self):
         return f'<OwnerInfo {self.id}>'

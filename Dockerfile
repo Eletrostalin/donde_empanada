@@ -16,5 +16,5 @@ COPY . /app/
 
 EXPOSE 5000
 
-CMD ["./start.sh"]
+CMD ["flask", "run", "--host=0.0.0.0"]
 
