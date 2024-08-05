@@ -1,3 +1,4 @@
+import os
 from logging.config import fileConfig
 
 from flask import current_app
@@ -6,10 +7,11 @@ from sqlalchemy import pool
 
 from alembic import context
 
+database_url = os.getenv('DATABASE_URL')
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-config.set_main_option('sqlalchemy.url', current_app.config.get('SQLALCHEMY_DATABASE_URI'))
+config.set_main_option('sqlalchemy.url', database_url)
 
 target_metadata = current_app.extensions['migrate'].db.metadata
 # Interpret the config file for Python logging.
