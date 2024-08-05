@@ -2,8 +2,14 @@
 from app import create_app
 from app.models import db, Migration
 import os
+import logging
 
 app = create_app()
+
+# Настраиваем логирование
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 def apply_migrations():
     # Путь к папке с миграциями
@@ -23,11 +29,14 @@ def apply_migrations():
             );
         ''')
         db.session.commit()
-        app.logger.info('Таблица migrations создана, так как она отсутствовала.')
+        logger.info('Таблица migrations создана, так как она отсутствовала.')
 
     # Проверяем каждую миграцию
     for migration_file in migration_files:
         migration_name = os.path.basename(migration_file)
+
+        # Логирование начала проверки миграции
+        logger.info(f'Проверка миграции: {migration_name}')
 
         # Проверяем, применена ли эта миграция
         if not Migration.query.filter_by(migration_name=migration_name).first():
@@ -36,6 +45,9 @@ def apply_migrations():
                 migration_sql = f.read()
 
             try:
+                # Логирование начала выполнения миграции
+                logger.info(f'Выполнение миграции: {migration_name}')
+
                 # Выполняем SQL команду
                 db.session.execute(migration_sql)
                 db.session.commit()
@@ -45,10 +57,13 @@ def apply_migrations():
                 db.session.add(new_migration)
                 db.session.commit()
 
-                app.logger.info(f'Migration {migration_name} applied successfully.')
+                # Логирование успешного выполнения миграции
+                logger.info(f'Миграция {migration_name} успешно выполнена.')
             except Exception as e:
+                # Откат изменений в случае ошибки
                 db.session.rollback()
-                app.logger.error(f'Error applying migration {migration_name}: {e}')
+                logger.error(f'Ошибка при выполнении миграции {migration_name}: {e}')
+
 
 if __name__ == '__main__':
     with app.app_context():
