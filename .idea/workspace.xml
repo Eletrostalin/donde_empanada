@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e5f4644e-ea72-4fc1-b3d3-5893473f7119" name="Changes" comment="Тестим алембик2" />
+    <list default="true" id="e5f4644e-ea72-4fc1-b3d3-5893473f7119" name="Changes" comment="Создание новой ветки main2" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -20,6 +20,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="278ed8040a0fa504981354d8d0fd963ea9713dd7" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RESET_MODE" value="HARD" />
   </component>
@@ -37,10 +42,12 @@
     "DefaultHtmlFileTemplate": "HTML File",
     "Python.__init__.executor": "Run",
     "Python.config.executor": "Run",
+    "Python.models.executor": "Run",
     "Python.run.executor": "Run",
+    "Python.рудзук.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "6a5992e2",
+    "git-widget-placeholder": "main2",
     "last_opened_file_path": "/Users/nickstanchenkov/donde_empanada4/donde_empanada4/app/templates"
   }
 }]]></component>
@@ -50,9 +57,9 @@
       <recent name="$PROJECT_DIR$/app" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/app" />
       <recent name="$PROJECT_DIR$/migrations" />
       <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/app" />
       <recent name="$PROJECT_DIR$/app/static" />
     </key>
   </component>
@@ -168,7 +175,55 @@
       <option name="project" value="LOCAL" />
       <updated>1722788766614</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Тестим алембик3">
+      <option name="closed" value="true" />
+      <created>1722844085600</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1722844085600</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Тестим алембик3">
+      <option name="closed" value="true" />
+      <created>1722847144434</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1722847144434</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Тестим алембик5">
+      <option name="closed" value="true" />
+      <created>1722860806370</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1722860806370</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Алембик провалился, автомиграции сделал сам в run.py">
+      <option name="closed" value="true" />
+      <created>1722878141043</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1722878141043</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Алембик провалился, автомиграции сделал сам в run.py">
+      <option name="closed" value="true" />
+      <created>1722878740178</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1722878740178</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Создание новой ветки main2">
+      <option name="closed" value="true" />
+      <created>1722899251134</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1722899251134</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -194,6 +249,10 @@
     <MESSAGE value="EXPOSE 5000&#10;и чуть изменили миграции бд" />
     <MESSAGE value="Тестим алембик" />
     <MESSAGE value="Тестим алембик2" />
-    <option name="LAST_COMMIT_MESSAGE" value="Тестим алембик2" />
+    <MESSAGE value="Тестим алембик3" />
+    <MESSAGE value="Тестим алембик5" />
+    <MESSAGE value="Алембик провалился, автомиграции сделал сам в run.py" />
+    <MESSAGE value="Создание новой ветки main2" />
+    <option name="LAST_COMMIT_MESSAGE" value="Создание новой ветки main2" />
   </component>
 </project>
