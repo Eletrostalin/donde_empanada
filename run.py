@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.future import select
 from sqlalchemy import text
 from app import create_app
-from app.models import db, Migration
+from app.models import db, Migrations
 
 app = create_app()
 
@@ -24,6 +24,7 @@ async_session = sessionmaker(
     class_=AsyncSession
 )
 
+
 async def check_any_table_exists() -> bool:
     """
     Проверяет, существуют ли какие-либо таблицы в базе данных.
@@ -35,6 +36,20 @@ async def check_any_table_exists() -> bool:
                 text("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public');")
             )
             return result.scalar()
+
+
+async def record_migration(session, migration_name: str):
+    """
+    Добавляет запись о примененной миграции в таблицу migrations.
+
+    :param session: Сессия базы данных.
+    :param migration_name: Имя примененной миграции.
+    """
+    new_migration = Migrations(migration_name=migration_name)
+    session.add(new_migration)
+    await session.commit()
+    logging.info(f"Миграция {migration_name} записана в таблицу migrations.")
+
 
 async def apply_migrations():
     """
@@ -49,13 +64,13 @@ async def apply_migrations():
         if tables_exist:
             # Проверяем, существует ли таблица migrations
             result = await session.execute(
-                text("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'migration');")
+                text("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'migrations');")
             )
             migrations_table_exists = result.scalar()
 
             if migrations_table_exists:
                 # Получаем список применённых миграций из таблицы migration
-                result = await session.execute(select(Migration.migration_name))
+                result = await session.execute(select(Migrations.migration_name))
                 applied_migrations = set(row[0] for row in result.all())
             else:
                 applied_migrations = set()
@@ -76,8 +91,8 @@ async def apply_migrations():
         if new_migrations:
             logging.info(f"Найдено {len(new_migrations)} новых миграций: {new_migrations}")
 
-            async with async_engine.connect() as conn:  # Используем async_engine для подключения к базе данных
-                async with conn.begin():  # Начало транзакции
+            async with async_engine.connect() as conn:
+                async with conn.begin():
                     try:
                         for migration in new_migrations:
                             migration_file_path = os.path.join(migrations_folder, migration)
@@ -89,24 +104,23 @@ async def apply_migrations():
                             # Разделение команд по ';' и выполнение каждой команды отдельно
                             for command in sql_commands.split(';'):
                                 command = command.strip()
-                                if command:  # Игнорируем пустые строки
+                                if command:
                                     logging.info(f"Применение SQL команды:\n{command}")
-                                    await conn.execute(text(command))  # Выполнение SQL команды
+                                    await conn.execute(text(command))
 
                         await conn.commit()
 
-                        # Добавление миграций в базу данных после выполнения всех команд
+                        # Запись миграции после ее успешного применения
                         for migration in new_migrations:
-                            new_migration = Migration(migration_name=migration)
-                            session.add(new_migration)
-                        await session.commit()
+                            await record_migration(session, migration)
+
                         logging.info(f"Миграции {new_migrations} успешно применены.")
 
                     except Exception as e:
                         logging.error(f"Ошибка при применении миграции: {e}")
-                        await conn.rollback()  # Откат транзакции при ошибке
+                        await conn.rollback()
                     else:
-                        await conn.commit()  # Подтверждение транзакции
+                        await conn.commit()
         else:
             logging.info("Новые миграции отсутствуют.")
 
@@ -118,6 +132,7 @@ def main():
     with app.app_context():
         asyncio.run(apply_migrations())  # Применяем миграции
     app.run(debug=True)
+
 
 if __name__ == '__main__':
     main()
