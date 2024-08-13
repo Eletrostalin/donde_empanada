@@ -15,11 +15,6 @@ def validate_phone(form, field):
     if not re.match(r'^[0-9]+$', field.data):
         raise ValidationError('Телефон должен содержать только цифры.')
 
-# Новый валидатор для часов работы
-def validate_working_hours(form, field):
-    if not re.match(r'^\d{2}:\d{2} - \d{2}:\d{2}$', field.data):
-        raise ValidationError('Время работы должно быть в формате xx:xx - xx:xx.')
-
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(message="Поле не может быть пустым"), validate_username])
     email = StringField('Email', validators=[Optional(), Email(message="Неправильный формат email")])
@@ -46,9 +41,9 @@ class LoginForm(FlaskForm):
 
 class LocationForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
-    description = TextAreaField('Description', validators=[DataRequired()])
     address = StringField('Address', validators=[DataRequired()])
-    working_hours = StringField('Working Hours', validators=[DataRequired(), validate_working_hours])
+    working_hours_start = StringField('Start Working Hours', validators=[DataRequired()])
+    working_hours_end = StringField('End Working Hours', validators=[DataRequired()])
     average_check = IntegerField('Average Check', validators=[DataRequired(), NumberRange(min=2000, max=5000)])  # Установка диапазона
     submit_add = SubmitField('Добавить')  # Кнопка для добавления
     submit_cancel = SubmitField('Отмена')  # Кнопка для отмены

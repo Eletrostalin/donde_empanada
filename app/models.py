@@ -1,5 +1,3 @@
-# models.py
-
 from datetime import datetime
 from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -29,7 +27,6 @@ class User(db.Model, UserMixin):
 class Location(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
-    description = db.Column(db.Text, nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
     average_rating = db.Column(db.Float, default=0, nullable=False)
@@ -37,7 +34,8 @@ class Location(db.Model):
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     address = db.Column(db.String(255), nullable=True)
-    working_hours = db.Column(db.String(255), nullable=True)
+    working_hours_start = db.Column(db.String(5), nullable=False)
+    working_hours_end = db.Column(db.String(5), nullable=False)
     average_check = db.Column(db.Integer, nullable=True)
 
     reviews = db.relationship('Review', backref='location', lazy=True)
