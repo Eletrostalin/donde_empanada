@@ -1,7 +1,10 @@
 # routes.py
+from select import select
 
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app as app
 from flask_login import login_user, logout_user, current_user, login_required
+
+from .database import get_async_engine, get_async_session
 from .models import db, User, Location, Review, OwnerInfo
 from .forms import RegistrationForm, LoginForm, LocationForm, OwnerInfoForm
 import logging
@@ -12,20 +15,19 @@ bp = Blueprint('main', __name__)
 @bp.route('/')
 def index():
     app.logger.info('Загрузка главной страницы')
-    # Инициализация всех необходимых форм
     registration_form = RegistrationForm()
     login_form = LoginForm()
     location_form = LocationForm()
     owner_info_form = OwnerInfoForm()
     google_maps_api_key = os.getenv('GOOGLE_MAPS_API_KEY')
 
-    # Передача всех форм в шаблон
     return render_template('index.html',
                            registration_form=registration_form,
                            login_form=login_form,
                            location_form=location_form,
                            owner_info_form=owner_info_form,
                            google_maps_api_key=google_maps_api_key)
+
 @bp.route('/register', methods=['POST'])
 def register():
     form = RegistrationForm()
@@ -154,9 +156,16 @@ def add_owner_info():
         app.logger.error(f'Ошибка валидации формы: {form.errors}')
         return jsonify(success=False, message=message)
 
+
 @bp.route('/markers')
-def markers():
-    locations = Location.query.all()
+async def markers():
+    engine = get_async_engine()
+    async_session = get_async_session(engine)
+
+    async with async_session() as session:
+        result = await session.execute(select(Location))
+        locations = result.scalars().all()
+
     markers = []
     for location in locations:
         markers.append({
@@ -171,6 +180,7 @@ def markers():
             'average_rating': location.average_rating,
             'rating_count': location.rating_count
         })
+
     app.logger.info('Список меток успешно загружен')
     return jsonify(markers)
 
