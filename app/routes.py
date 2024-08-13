@@ -1,5 +1,6 @@
 # routes.py
-from select import select
+from sqlalchemy.ext.asyncio import async_session
+from sqlalchemy.future import select
 
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app as app
 from flask_login import login_user, logout_user, current_user, login_required
@@ -105,9 +106,9 @@ def add_location():
             app.logger.debug('Координаты: %s, %s', latitude, longitude)
             new_location = Location(
                 name=form.name.data,
-                description=form.description.data,
                 address=form.address.data,
-                working_hours=form.working_hours.data,
+                working_hours_start=form.working_hours_start.data,  # Используем отдельные поля для начала
+                working_hours_end=form.working_hours_end.data,  # и конца рабочего времени
                 average_check=form.average_check.data,
                 latitude=latitude,
                 longitude=longitude,
@@ -156,13 +157,12 @@ def add_owner_info():
         app.logger.error(f'Ошибка валидации формы: {form.errors}')
         return jsonify(success=False, message=message)
 
-
 @bp.route('/markers')
 async def markers():
     engine = get_async_engine()
-    async_session = get_async_session(engine)
+    async_session = get_async_session(engine)  # Получаем фабрику сессий
 
-    async with async_session() as session:
+    async with async_session() as session:  # Создаем новую сессию
         result = await session.execute(select(Location))
         locations = result.scalars().all()
 
@@ -171,11 +171,10 @@ async def markers():
         markers.append({
             'id': location.id,
             'name': location.name,
-            'description': location.description,
             'latitude': location.latitude,
             'longitude': location.longitude,
             'address': location.address,
-            'working_hours': location.working_hours,
+            'working_hours': f"{location.working_hours_start} - {location.working_hours_end}",
             'average_check': location.average_check,
             'average_rating': location.average_rating,
             'rating_count': location.rating_count

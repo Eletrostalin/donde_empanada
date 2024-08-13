@@ -50,12 +50,12 @@
                 {{ login_form.hidden_tag() }}
                 {{ login_form.csrf_token }}
                 <div class="form-group">
-                    <label for="username">Имя пользователя</label>
-                    <input type="text" class="form-control" name="username" placeholder="Имя пользователя" required>
+                    <label for="login-username">Имя пользователя</label>
+                    <input type="text" id="login-username" class="form-control" name="username" placeholder="Имя пользователя" required>
                 </div>
                 <div class="form-group">
-                    <label for="password">Пароль</label>
-                    <input type="password" class="form-control" name="password" placeholder="Пароль" required>
+                    <label for="login-password">Пароль</label>
+                    <input type="password" id="login-password" class="form-control" name="password" placeholder="Пароль" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Войти</button>
                 <button type="button" class="btn btn-secondary" onclick="closeLoginForm()">Отмена</button>
@@ -71,32 +71,32 @@
                 {{ registration_form.hidden_tag() }}
                 {{ registration_form.csrf_token }}
                 <div class="form-group">
-                    <label for="username">Имя пользователя</label>
-                    <input type="text" class="form-control" name="username" placeholder="Имя пользователя" required>
+                    <label for="registration-username">Имя пользователя</label>
+                    <input type="text" id="registration-username" class="form-control" name="username" placeholder="Имя пользователя" required>
                 </div>
                 <div class="form-group">
-                    <label for="first_name">Имя</label>
-                    <input type="text" class="form-control" name="first_name" placeholder="Имя" required>
+                    <label for="registration-first_name">Имя</label>
+                    <input type="text" id="registration-first_name" class="form-control" name="first_name" placeholder="Имя" required>
                 </div>
                 <div class="form-group">
-                    <label for="second_name">Фамилия</label>
-                    <input type="text" class="form-control" name="second_name" placeholder="Фамилия" required>
+                    <label for="registration-second_name">Фамилия</label>
+                    <input type="text" id="registration-second_name" class="form-control" name="second_name" placeholder="Фамилия" required>
                 </div>
                 <div class="form-group">
-                    <label for="email">Электронная почта</label>
-                    <input type="email" class="form-control" name="email" placeholder="Электронная почта" required>
+                    <label for="registration-email">Электронная почта</label>
+                    <input type="email" id="registration-email" class="form-control" name="email" placeholder="Электронная почта" required>
                 </div>
                 <div class="form-group">
-                    <label for="phone">Телефон</label>
-                    <input type="text" class="form-control" name="phone" placeholder="Телефон" required>
+                    <label for="registration-phone">Телефон</label>
+                    <input type="text" id="registration-phone" class="form-control" name="phone" placeholder="Телефон" required>
                 </div>
                 <div class="form-group">
-                    <label for="password">Пароль</label>
-                    <input type="password" class="form-control" name="password" placeholder="Пароль" required>
+                    <label for="registration-password">Пароль</label>
+                    <input type="password" id="registration-password" class="form-control" name="password" placeholder="Пароль" required>
                 </div>
                 <div class="form-group">
-                    <label for="confirm_password">Повторите пароль</label>
-                    <input type="password" class="form-control" name="confirm_password" placeholder="Повторите пароль" required>
+                    <label for="registration-confirm_password">Повторите пароль</label>
+                    <input type="password" id="registration-confirm_password" class="form-control" name="confirm_password" placeholder="Повторите пароль" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
                 <button type="button" class="btn btn-secondary" onclick="closeRegistrationForm()">Отмена</button>
@@ -112,19 +112,23 @@
                 {{ location_form.csrf_token }}
                 <div class="form-group">
                     <label for="name">Название</label>
-                    <input type="text" class="form-control" name="name" placeholder="Название (не более 30 символов)" maxlength="30" required>
+                    <input type="text" id="name" class="form-control" name="name" placeholder="Название (не более 30 символов)" maxlength="30" required>
                 </div>
                 <div class="form-group">
                     <label for="address">Адрес</label>
-                    <input type="text" class="form-control" name="address" placeholder="Адрес (до 150 символов)" maxlength="150">
+                    <input type="text" id="address" class="form-control" name="address" placeholder="Адрес (до 150 символов)" maxlength="150">
                 </div>
                 <div class="form-group">
                     <label for="average_check">Цена за эмпанадос</label>
-                    <input type="number" class="form-control" name="average_check" placeholder="Цена (2000 - 5000)" min="2000" max="5000" required>
+                    <input type="number" id="average_check" class="form-control" name="average_check" placeholder="Цена (2000 - 5000)" min="2000" max="5000" required>
                 </div>
                 <div class="form-group">
-                    <label for="working_hours">Часы работы</label>
-                    <input type="text" class="form-control" name="working_hours" placeholder="Часы работы (например, 9:00 - 18:00)" required>
+                    <label for="working_hours_start">Начало работы</label>
+                    <input type="time" id="working_hours_start" name="working_hours_start" min="00:00" max="23:59" required>
+                </div>
+                <div class="form-group">
+                    <label for="working_hours_end">Конец работы</label>
+                    <input type="time" id="working_hours_end" name="working_hours_end" min="00:00" max="23:59" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Добавить</button>
                 <button type="button" class="btn btn-secondary" onclick="closeAddMarkerForm()">Отмена</button>
@@ -141,16 +145,24 @@
                 {{ owner_info_form.csrf_token }}
                 <div class="form-group">
                     <label for="website">Веб-сайт</label>
-                    <input type="url" class="form-control" name="website" placeholder="URL сайта (до 200 символов)" maxlength="200">
+                    <input type="url" id="website" class="form-control" name="website" placeholder="URL сайта (до 200 символов)" maxlength="200">
                 </div>
                 <div class="form-group">
                     <label for="owner_info">Информация о вас и вашем заведении</label>
-                    <textarea name="owner_info" class="form-control" rows="4" required></textarea>
+                    <textarea id="owner_info" name="owner_info" class="form-control" rows="4" required></textarea>
                 </div>
                 <input type="hidden" name="location_id" id="location_id">
                 <button type="submit" class="btn btn-primary">Отправить</button>
                 <button type="button" class="btn btn-secondary" onclick="closeOwnerInfoForm()">Отмена</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content centered-form">
+            <p id="success-message"></p>
+            <button type="button" class="btn btn-primary" onclick="document.getElementById('success-modal').style.display='none'">ОК</button>
         </div>
     </div>
 

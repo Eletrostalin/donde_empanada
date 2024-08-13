@@ -103,7 +103,7 @@ function showOwnerInfoForm() {
 
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: 55.7558, lng: 37.6176 },
+        center: { lat: -34.6037, lng: -58.3816 }, // Координаты Буэнос-Айреса
         zoom: 8,
         disableDefaultUI: true
     });
@@ -122,6 +122,7 @@ function initMap() {
         }
     });
 }
+
 
 function promptLocationSelection() {
     console.log('Режим добавления метки активирован');
