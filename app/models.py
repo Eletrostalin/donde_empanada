@@ -45,14 +45,15 @@ class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=False)
-    rating = db.Column(db.Integer, nullable=False)
-    comment = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    rating = db.Column(db.Integer, nullable=True)
+    comment = db.Column(db.Text, nullable=True)  # Поле теперь является текстовым
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     user = db.relationship('User', backref='reviews', lazy=True)
 
     def __repr__(self):
         return f'<Review {self.rating}>'
+
 
 class OwnerInfo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -71,5 +72,3 @@ class Migrations(db.Model):
     def __repr__(self):
         return f'<Migration {self.migration_name} applied at {self.applied_at}>'
 
-    def __repr__(self):
-        return f'<OwnerInfo {self.id}>'

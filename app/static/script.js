@@ -1,8 +1,18 @@
-// script.js
-
 let isAddingMarker = false;
 let selectedLatLng = null;
 let map;
+
+function notifyMarkerModeActivated() {
+    const notification = document.createElement('div');
+    notification.id = 'marker-mode-notification';
+    notification.className = 'marker-mode-notification';
+    notification.innerText = 'Режим добавления маркера активирован. Нажмите на карту, чтобы добавить маркер.';
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 2000);
+}
 
 function toggleDropdown() {
     const dropdown = document.getElementById('user-dropdown');
@@ -36,42 +46,9 @@ async function handleLogin(event) {
     }
 }
 
-async function handleRegistration(event) {
-    event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
-
-    try {
-        const response = await fetch(form.action, {
-            method: form.method,
-            body: formData,
-            headers: {
-                'X-CSRFToken': formData.get('csrf_token')
-            }
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            showSuccessModal(result.message);
-            setTimeout(() => {
-                document.getElementById('success-modal').style.display = 'none';
-                location.reload();
-            }, 1500);
-        } else {
-            alert(`Ошибка регистрации: ${result.message}`);
-        }
-    } catch (error) {
-        console.error('Ошибка:', error);
-        alert('Произошла ошибка при регистрации. Пожалуйста, попробуйте снова.');
-    }
-}
-
-function showSuccessModal(message) {
-    const modal = document.getElementById('success-modal');
-    const messageElement = document.getElementById('success-message');
-    messageElement.textContent = message;
-    modal.style.display = 'block';
+function showLoginModal() {
+    document.getElementById('login-modal').style.display = 'block';
+    document.getElementById('login-required-modal').style.display = 'none';
 }
 
 function closeLoginForm() {
@@ -98,12 +75,12 @@ function showRegistrationForm() {
 function showOwnerInfoForm() {
     document.getElementById('owner-info-modal').style.display = 'block';
     document.getElementById('add-marker-modal').style.display = 'none';
-    document.getElementById('location_id').value = selectedLatLng ? selectedLatLng.latLng : null;  // Передаем ID локации
+    document.getElementById('location_id').value = selectedLatLng ? selectedLatLng.latLng : null;
 }
 
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: -34.6037, lng: -58.3816 }, // Координаты Буэнос-Айреса
+        center: { lat: -34.6037, lng: -58.3816 },
         zoom: 8,
         disableDefaultUI: true
     });
@@ -111,10 +88,8 @@ function initMap() {
     fetchMarkers(map);
 
     map.addListener('click', function(event) {
-        console.log('Клик на карту', event.latLng.toString());
         if (isAddingMarker) {
             selectedLatLng = event.latLng;
-            console.log('Координаты добавления:', selectedLatLng.toString());
             document.getElementById('add-marker-modal').style.display = 'block';
             document.getElementById('latitude').value = selectedLatLng.lat();
             document.getElementById('longitude').value = selectedLatLng.lng();
@@ -123,10 +98,32 @@ function initMap() {
     });
 }
 
-
 function promptLocationSelection() {
-    console.log('Режим добавления метки активирован');
     isAddingMarker = true;
+    notifyMarkerModeActivated();
+}
+
+function openReviewModal(locationId) {
+    if (isUserAuthenticated()) {
+        const reviewModal = document.getElementById('review-modal');
+        reviewModal.style.display = 'block';
+        document.getElementById('review-location-id').value = locationId;
+    } else {
+        showLoginRequiredModal();
+    }
+}
+
+function isUserAuthenticated() {
+    return !!document.getElementById('profileDropdown');
+}
+
+function showLoginRequiredModal() {
+    const loginModal = document.getElementById('login-required-modal');
+    loginModal.style.display = 'block';
+
+    setTimeout(() => {
+        loginModal.style.display = 'none';
+    }, 2000);
 }
 
 async function fetchMarkers(map) {
@@ -136,7 +133,6 @@ async function fetchMarkers(map) {
 
         for (const marker of markers) {
             if (!marker.id) {
-                console.error('Маркер не имеет id:', marker);
                 continue;
             }
 
@@ -144,7 +140,8 @@ async function fetchMarkers(map) {
                 position: { lat: marker.latitude, lng: marker.longitude },
                 map: map,
                 title: marker.name,
-                icon: getMarkerIcon(marker.average_rating)
+                icon: getMarkerIcon(marker.average_rating),
+                animation: google.maps.Animation.DROP
             });
 
             let reviewsContent = '';
@@ -165,9 +162,10 @@ async function fetchMarkers(map) {
                     reviewsContent = '<p>Отзывов пока нет.</p>';
                 }
             } catch (error) {
-                console.error(`Ошибка при загрузке отзывов для маркера ${marker.id}:`, error);
                 reviewsContent = '<p>Ошибка при загрузке отзывов.</p>';
             }
+
+            const starsContent = getStarRatingHTML(marker.average_rating, marker.id);
 
             const infoWindowContent = `
                 <div>
@@ -178,6 +176,7 @@ async function fetchMarkers(map) {
                     <p><strong>Средний чек:</strong> ${marker.average_check}</p>
                     <p><strong>Средняя оценка:</strong> ${marker.average_rating.toFixed(1)}</p>
                     <p><strong>Количество оценок:</strong> ${marker.rating_count}</p>
+                    ${starsContent}
                     <h4>Отзывы:</h4>
                     ${reviewsContent}
                     <button class="btn btn-primary mt-2" onclick="openReviewModal(${marker.id})">Оставить отзыв</button>
@@ -191,6 +190,8 @@ async function fetchMarkers(map) {
             markerObj.addListener('click', () => {
                 infoWindow.open(map, markerObj);
             });
+
+            initializeStars(marker.average_rating, marker.id);
         }
     } catch (error) {
         console.error('Ошибка при загрузке меток:', error);
@@ -212,79 +213,43 @@ function getMarkerIcon(averageRating) {
     }
 }
 
-async function handleAddLocation(event) {
-    event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
-
-    if (selectedLatLng) {
-        formData.append('latitude', selectedLatLng.lat());
-        formData.append('longitude', selectedLatLng.lng());
-    } else {
-        alert('Пожалуйста, выберите точку на карте');
-        return;
+function getStarRatingHTML(averageRating, locationId) {
+    let starsHTML = '<div class="star-rating">';
+    for (let i = 1; i <= 5; i++) {
+        starsHTML += `
+            <span class="star" data-value="${i}" data-location-id="${locationId}" onclick="rateLocation(${locationId}, ${i})">
+                ${i <= averageRating ? '★' : '☆'}
+            </span>
+        `;
     }
+    starsHTML += '</div>';
+    return starsHTML;
+}
 
+async function rateLocation(locationId, rating) {
     try {
-        const response = await fetch(form.action, {
-            method: form.method,
-            body: formData,
+        const response = await fetch('/rate_location', {
+            method: 'POST',
             headers: {
-                'X-CSRFToken': formData.get('csrf_token')
-            }
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+            },
+            body: JSON.stringify({
+                location_id: locationId,
+                rating: rating
+            })
         });
 
         const result = await response.json();
 
         if (result.success) {
-            showSuccessModal(result.message);
-            setTimeout(() => {
-                document.getElementById('success-modal').style.display = 'none';
-                location.reload();
-            }, 2000);
+            alert('Ваша оценка успешно сохранена!');
         } else {
-            console.error(`Ошибка добавления локации: ${result.message}`);
-            alert(`Ошибка добавления локации: ${result.message}`);
+            alert(`Ошибка сохранения оценки: ${result.message}`);
         }
     } catch (error) {
-        console.error('Ошибка:', error);
-        alert('Произошла ошибка при добавлении локации. Пожалуйста, попробуйте снова.');
+        alert('Произошла ошибка при сохранении оценки. Пожалуйста, попробуйте снова.');
     }
-}
-
-async function handleOwnerInfoSubmit(event) {
-    event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
-
-    try {
-        const response = await fetch(form.action, {
-            method: form.method,
-            body: formData,
-            headers: {
-                'X-CSRFToken': formData.get('csrf_token')
-            }
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            alert(result.message);
-            document.getElementById('owner-info-modal').style.display = 'none';
-            location.reload();  // Перезагрузка страницы для обновления информации
-        } else {
-            alert(`Ошибка добавления информации: ${result.message}`);
-        }
-    } catch (error) {
-        console.error('Ошибка:', error);
-        alert('Произошла ошибка при добавлении информации. Пожалуйста, попробуйте снова.');
-    }
-}
-
-function openReviewModal(locationId) {
-    const reviewModal = document.getElementById('review-modal');
-    reviewModal.style.display = 'block';
-    document.getElementById('review-location-id').value = locationId;
 }
 
 async function handleReviewSubmit(event) {
@@ -304,20 +269,39 @@ async function handleReviewSubmit(event) {
         const result = await response.json();
 
         if (result.success) {
-            alert(result.message);
+            alert('Ваш отзыв успешно отправлен!');
             document.getElementById('review-modal').style.display = 'none';
-            location.reload();
+            location.reload(); // Перезагрузка страницы для обновления данных
         } else {
-            alert(`Ошибка добавления отзыва: ${result.message}`);
+            alert(`Ошибка отправки отзыва: ${result.message}`);
         }
     } catch (error) {
-        console.error('Ошибка:', error);
-        alert('Произошла ошибка при добавлении отзыва. Пожалуйста, попробуйте снова.');
+        alert('Произошла ошибка при отправке отзыва. Пожалуйста, попробуйте снова.');
     }
 }
 
-function closeReviewModal() {
-    document.getElementById('review-modal').style.display = 'none';
+// Инициализация звездочек на основе среднего рейтинга
+function initializeStars(averageRating, locationId) {
+    document.querySelectorAll(`.star[data-location-id="${locationId}"]`).forEach(star => {
+        let starValue = star.getAttribute('data-value');
+        if (starValue <= averageRating) {
+            star.classList.add('selected');
+        } else {
+            star.classList.remove('selected');
+        }
+
+        star.addEventListener('mouseover', function() {
+            for (let i = 1; i <= starValue; i++) {
+                document.querySelector(`.star[data-location-id="${locationId}"][data-value="${i}"]`).classList.add('hover');
+            }
+        });
+
+        star.addEventListener('mouseout', function() {
+            document.querySelectorAll(`.star[data-location-id="${locationId}"]`).forEach(s => {
+                s.classList.remove('hover');
+            });
+        });
+    });
 }
 
 function locateMe() {

@@ -1,4 +1,5 @@
-# routes.py
+from datetime import datetime
+
 from sqlalchemy.ext.asyncio import async_session
 from sqlalchemy.future import select
 
@@ -7,7 +8,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 
 from .database import get_async_engine, get_async_session
 from .models import db, User, Location, Review, OwnerInfo
-from .forms import RegistrationForm, LoginForm, LocationForm, OwnerInfoForm
+from .forms import RegistrationForm, LoginForm, LocationForm, OwnerInfoForm, ReviewForm
 import logging
 import os
 
@@ -20,6 +21,7 @@ def index():
     login_form = LoginForm()
     location_form = LocationForm()
     owner_info_form = OwnerInfoForm()
+    review_form = ReviewForm()
     google_maps_api_key = os.getenv('GOOGLE_MAPS_API_KEY')
 
     return render_template('index.html',
@@ -27,6 +29,7 @@ def index():
                            login_form=login_form,
                            location_form=location_form,
                            owner_info_form=owner_info_form,
+                           review_form=review_form,
                            google_maps_api_key=google_maps_api_key)
 
 @bp.route('/register', methods=['POST'])
@@ -116,7 +119,7 @@ def add_location():
             )
             db.session.add(new_location)
             db.session.commit()
-            message = 'Метка успешно добавлена в базу данных! 😊'
+            message = 'Точка успешно добавлена! 😊'
             app.logger.info(message)
             return jsonify(success=True, message=message)
         except Exception as e:
@@ -195,31 +198,65 @@ def reviews(location_id):
     ]
     return jsonify(reviews_list)
 
+
 @bp.route('/add_review', methods=['POST'])
 @login_required
 def add_review():
     try:
         location_id = request.form['location_id']
-        rating = int(request.form['rating'])
         comment = request.form['comment']
 
-        new_review = Review(
-            user_id=current_user.id,
-            location_id=location_id,
-            rating=rating,
-            comment=comment
-        )
-        db.session.add(new_review)
-        db.session.commit()
+        # Проверка на существование отзыва
+        existing_review = Review.query.filter_by(user_id=current_user.id, location_id=location_id).first()
 
-        location = Location.query.get(location_id)
-        reviews = Review.query.filter_by(location_id=location_id).all()
-        total_ratings = sum([review.rating for review in reviews])
-        location.rating_count = len(reviews)
-        location.average_rating = total_ratings / location.rating_count if location.rating_count else 0
-        db.session.commit()
+        if existing_review:
+            if existing_review.comment:
+                return jsonify(success=False, message='Ваш отзыв уже добавлен.')
+            else:
+                existing_review.comment = comment
+                existing_review.created_at = datetime.utcnow()
+                db.session.commit()
+                return jsonify(success=True, message='Ваш отзыв успешно обновлен!')
 
-        return jsonify(success=True, message='Отзыв успешно добавлен!')
+        return jsonify(success=False, message='Ваш отзыв уже добавлен.')
     except Exception as e:
         app.logger.error(f'Ошибка при добавлении отзыва: {e}')
         return jsonify(success=False, message=f'Ошибка при добавлении отзыва: {e}')
+
+
+@bp.route('/rate_location', methods=['POST'])
+@login_required
+def rate_location():
+    try:
+        location_id = request.json['location_id']
+        rating = int(request.json['rating'])
+
+        # Логирование ID локации и начального действия
+        app.logger.info(f'Проверка существования записи для локации {location_id} и пользователя {current_user.id}')
+
+        # Проверка на существование оценки
+        existing_review = Review.query.filter_by(user_id=current_user.id, location_id=location_id).first()
+
+        if existing_review:
+            app.logger.info(f'Найдена существующая запись для локации {location_id}: {existing_review}')
+            if existing_review.rating is not None:
+                app.logger.info(f'Пользователь {current_user.id} уже добавил оценку для локации {location_id}')
+                return jsonify(success=False, message='Ваша оценка уже добавлена.')
+            else:
+                existing_review.rating = rating
+                db.session.commit()
+                app.logger.info(
+                    f'Оценка для локации {location_id} успешно обновлена для пользователя {current_user.id}')
+                return jsonify(success=True, message='Ваша оценка успешно обновлена!')
+        else:
+            # Создание новой записи, если не найдена существующая
+            new_review = Review(user_id=current_user.id, location_id=location_id, rating=rating)
+            db.session.add(new_review)
+            db.session.commit()
+            app.logger.info(f'Новая оценка для локации {location_id} добавлена пользователем {current_user.id}')
+            return jsonify(success=True, message='Ваша оценка успешно добавлена!')
+
+    except Exception as e:
+        app.logger.error(f'Ошибка при сохранении оценки: {e}')
+        return jsonify(success=False, message=f'Ошибка при сохранении оценки: {e}')
+

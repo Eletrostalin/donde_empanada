@@ -55,6 +55,6 @@ class ReviewForm(FlaskForm):
     submit = SubmitField('Add Review')
 
 class OwnerInfoForm(FlaskForm):
-    website = StringField('Website', validators=[Optional(), Length(max=200), Email(message='Введите корректный URL')])
+    website = StringField('Website', validators=[Length(max=200)])  # Простая строка без URL-валидации
     owner_info = TextAreaField('Info About You and Your Establishment', validators=[DataRequired(), Length(max=500)])
     submit = SubmitField('Отправить')  # Кнопка для отправки информации

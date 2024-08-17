@@ -156,3 +156,30 @@ body, html {
     max-width: 400px; /* Максимальная ширина формы */
     font-size: 14px;
 }
+.marker-mode-notification {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ffffff;
+    color: #000;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 1000; /* Убедитесь, что уведомление отображается поверх других элементов */
+    text-align: center;
+    font-size: 16px;
+}
+
+.star {
+    color: gray; /* Цвет звезд по умолчанию */
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.star.selected {
+    color: gold; /* Цвет выбранных звезд */
+}
+
+.star.hover {
+    color: gold; /* Цвет звезд при наведении */
+}
