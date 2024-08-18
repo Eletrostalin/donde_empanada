@@ -2,24 +2,19 @@ let isAddingMarker = false;
 let selectedLatLng = null;
 let map;
 
-function notifyMarkerModeActivated() {
-    const notification = document.createElement('div');
-    notification.id = 'marker-mode-notification';
-    notification.className = 'marker-mode-notification';
-    notification.innerText = 'Режим добавления маркера активирован. Нажмите на карту, чтобы добавить маркер.';
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-        notification.remove();
-    }, 2000);
+document.getElementById('add-marker-form').addEventListener('submit', handleAddMarker);
+// Универсальная функция для открытия модального окна
+function openModal(modalId) {
+    document.getElementById(modalId).style.display = 'block';
 }
 
-function toggleDropdown() {
-    const dropdown = document.getElementById('user-dropdown');
-    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+// Универсальная функция для закрытия модального окна
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
 }
 
-async function handleLogin(event) {
+// Универсальная функция для обработки отправки формы
+async function handleFormSubmit(event, successCallback, errorCallback) {
     event.preventDefault();
     const form = event.target;
     const formData = new FormData(form);
@@ -35,49 +30,52 @@ async function handleLogin(event) {
 
         const result = await response.json();
 
-        if (result.success) {
-            location.reload();
-        } else {
-            alert(`Ошибка входа: ${result.message}`);
+        if (result.success && successCallback) {
+            successCallback(result);
+        } else if (errorCallback) {
+            errorCallback(result);
         }
     } catch (error) {
         console.error('Ошибка:', error);
-        alert('Произошла ошибка при входе. Пожалуйста, попробуйте снова.');
+        alert('Произошла ошибка. Пожалуйста, попробуйте снова.');
     }
 }
 
-function showLoginModal() {
-    document.getElementById('login-modal').style.display = 'block';
-    document.getElementById('login-required-modal').style.display = 'none';
+// Обработчик кликов по области вне модального окна
+window.onclick = function(event) {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(function(modal) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
 }
 
-function closeLoginForm() {
-    document.getElementById('login-modal').style.display = 'none';
+function notifyMarkerModeActivated() {
+    const notification = document.createElement('div');
+    notification.id = 'marker-mode-notification';
+    notification.className = 'marker-mode-notification';
+    notification.innerText = 'Режим добавления маркера активирован. Нажмите на карту, чтобы добавить маркер.';
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 2000);
 }
 
-function closeRegistrationForm() {
-    document.getElementById('registration-modal').style.display = 'none';
+// Универсальная функция для отображения уведомлений
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.innerText = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 2000); // Уведомление исчезает через 2 секунды
 }
 
-function closeAddMarkerForm() {
-    document.getElementById('add-marker-modal').style.display = 'none';
-}
-
-function closeOwnerInfoForm() {
-    document.getElementById('owner-info-modal').style.display = 'none';
-}
-
-function showRegistrationForm() {
-    document.getElementById('login-modal').style.display = 'none';
-    document.getElementById('registration-modal').style.display = 'block';
-}
-
-function showOwnerInfoForm() {
-    document.getElementById('owner-info-modal').style.display = 'block';
-    document.getElementById('add-marker-modal').style.display = 'none';
-    document.getElementById('location_id').value = selectedLatLng ? selectedLatLng.latLng : null;
-}
-
+// Инициализация карты
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
         center: { lat: -34.6037, lng: -58.3816 },
@@ -90,40 +88,99 @@ function initMap() {
     map.addListener('click', function(event) {
         if (isAddingMarker) {
             selectedLatLng = event.latLng;
-            document.getElementById('add-marker-modal').style.display = 'block';
+            openModal('add-marker-modal');
             document.getElementById('latitude').value = selectedLatLng.lat();
             document.getElementById('longitude').value = selectedLatLng.lng();
+            document.getElementById('location_id').value = selectedLatLng.lat() + ',' + selectedLatLng.lng();
             isAddingMarker = false;
         }
     });
+
+    // Обработчик для формы добавления маркера
+    document.getElementById('add-marker-form').addEventListener('submit', handleAddMarker);
 }
 
-function promptLocationSelection() {
-    isAddingMarker = true;
-    notifyMarkerModeActivated();
+// Функции для управления модальными окнами
+function showLoginModal() {
+    openModal('login-modal');
+}
+
+function closeLoginForm() {
+    closeModal('login-modal');
+}
+
+function closeRegistrationForm() {
+    closeModal('registration-modal');
+}
+
+function closeAddMarkerForm() {
+    closeModal('add-marker-modal');
+}
+
+function closeOwnerInfoForm() {
+    closeModal('owner-info-modal');
+}
+
+function showRegistrationForm() {
+    closeModal('login-modal');
+    openModal('registration-modal');
+}
+
+function showOwnerInfoForm() {
+    const addMarkerForm = document.getElementById('add-marker-form');
+    const formData = new FormData(addMarkerForm);
+
+    // Сначала добавляем локацию
+    fetch(addMarkerForm.action, {
+        method: addMarkerForm.method,
+        body: formData,
+        headers: {
+            'X-CSRFToken': formData.get('csrf_token')
+        }
+    }).then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // Если добавление локации успешно, открываем форму владельца
+            document.getElementById('location_id').value = result.location_id; // сохраняем id локации
+            openModal('owner-info-modal');
+        } else {
+            showNotification(`Ошибка добавления локации: ${result.message}`);
+        }
+    }).catch(error => {
+        console.error('Ошибка:', error);
+        showNotification('Произошла ошибка при добавлении локации. Пожалуйста, попробуйте снова.');
+    });
+
+    // Закрываем модалку с добавлением метки
+    closeModal('add-marker-modal');
 }
 
 function openReviewModal(locationId) {
     if (isUserAuthenticated()) {
         const reviewModal = document.getElementById('review-modal');
         reviewModal.style.display = 'block';
-        document.getElementById('review-location-id').value = locationId;
+        document.getElementById('location_id').value = selectedLatLng ? selectedLatLng.lat() + ',' + selectedLatLng.lng() : null;
     } else {
         showLoginRequiredModal();
     }
 }
 
-function isUserAuthenticated() {
-    return !!document.getElementById('profileDropdown');
+function showLoginRequiredModal() {
+    openModal('login-required-modal');
+    setTimeout(() => {
+        closeModal('login-required-modal');
+    }, 2000);
 }
 
-function showLoginRequiredModal() {
-    const loginModal = document.getElementById('login-required-modal');
-    loginModal.style.display = 'block';
+function toggleDropdown() {
+    const dropdown = document.getElementById('user-dropdown');
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+}
 
-    setTimeout(() => {
-        loginModal.style.display = 'none';
-    }, 2000);
+// Функции для работы с картой и маркерами
+function promptLocationSelection() {
+    isAddingMarker = true;
+    notifyMarkerModeActivated();
 }
 
 async function fetchMarkers(map) {
@@ -243,40 +300,12 @@ async function rateLocation(locationId, rating) {
         const result = await response.json();
 
         if (result.success) {
-            alert('Ваша оценка успешно сохранена!');
+            showNotification('Ваша оценка успешно сохранена!');
         } else {
-            alert(`Ошибка сохранения оценки: ${result.message}`);
+            showNotification(`Ошибка сохранения оценки: ${result.message}`);
         }
     } catch (error) {
-        alert('Произошла ошибка при сохранении оценки. Пожалуйста, попробуйте снова.');
-    }
-}
-
-async function handleReviewSubmit(event) {
-    event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
-
-    try {
-        const response = await fetch(form.action, {
-            method: form.method,
-            body: formData,
-            headers: {
-                'X-CSRFToken': formData.get('csrf_token')
-            }
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            alert('Ваш отзыв успешно отправлен!');
-            document.getElementById('review-modal').style.display = 'none';
-            location.reload(); // Перезагрузка страницы для обновления данных
-        } else {
-            alert(`Ошибка отправки отзыва: ${result.message}`);
-        }
-    } catch (error) {
-        alert('Произошла ошибка при отправке отзыва. Пожалуйста, попробуйте снова.');
+        showNotification('Произошла ошибка при сохранении оценки. Пожалуйста, попробуйте снова.');
     }
 }
 
@@ -319,10 +348,10 @@ function locateMe() {
                 title: 'Вы здесь'
             });
         }, () => {
-            alert('Ошибка при определении местоположения.');
+            showNotification('Ошибка при определении местоположения.');
         });
     } else {
-        alert('Геолокация не поддерживается вашим браузером.');
+        showNotification('Геолокация не поддерживается вашим браузером.');
     }
 }
 
@@ -334,11 +363,137 @@ function zoomOut() {
     map.setZoom(map.getZoom() - 1);
 }
 
-window.onclick = function(event) {
-    const modals = ['login-modal', 'registration-modal', 'add-marker-modal', 'owner-info-modal', 'review-modal', 'success-modal'];
-    modals.forEach(function(modal) {
-        if (event.target == document.getElementById(modal)) {
-            document.getElementById(modal).style.display = "none";
+async function handleRegistration(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch(form.action, {
+            method: form.method,
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrf_token')
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification(result.message);
+            setTimeout(() => {
+                location.reload(); // Перезагружаем страницу
+                showLoginModal(); // Открываем форму авторизации
+            }, 2000); // Задержка перед перезагрузкой (2 секунды)
+        } else {
+            showNotification(`Ошибка регистрации: ${result.message}`);
         }
-    });
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showNotification('Произошла ошибка при регистрации. Пожалуйста, попробуйте снова.');
+    }
+}
+
+async function handleLogin(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch(form.action, {
+            method: form.method,
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrf_token')
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification(result.message);
+            setTimeout(() => {
+                location.reload(); // Перезагрузка страницы
+            }, 2000); // Задержка в 2 секунды перед перезагрузкой
+        } else {
+            showNotification(`Ошибка входа: ${result.message}`);
+            setTimeout(() => {
+                closeLoginForm(); // Закрытие формы, если требуется
+            }, 2000);
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showNotification('Произошла ошибка при входе. Пожалуйста, попробуйте снова.');
+    }
+}
+
+async function handleAddMarker(event) {
+    event.preventDefault();  // предотвращает стандартное поведение отправки формы
+    const form = event.target;
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch(form.action, {
+            method: form.method,
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrf_token')
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification(result.message);
+            setTimeout(() => {
+                location.reload();  // перезагружает страницу после уведомления
+            }, 2000);
+        } else {
+            showNotification(`Ошибка добавления точки: ${result.message}`);
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showNotification('Произошла ошибка при добавлении точки. Пожалуйста, попробуйте снова.');
+    }
+}
+
+async function handleOwnerInfoSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch(form.action, {
+            method: form.method,
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrf_token')
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification(result.message);
+            setTimeout(() => {
+                location.reload(); // Перезагрузка страницы через 2 секунды
+            }, 2000);
+        } else {
+            showNotification(`Ошибка: ${result.message}`);
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showNotification('Произошла ошибка при добавлении информации. Пожалуйста, попробуйте снова.');
+    }
+}
+
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.innerText = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 2000); // Уведомление исчезает через 2 секунды
 }

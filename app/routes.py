@@ -96,6 +96,7 @@ def logout():
     app.logger.info(message)
     return redirect(url_for('main.index'))
 
+
 @bp.route('/add_location', methods=['POST'])
 @login_required
 def add_location():
@@ -104,14 +105,18 @@ def add_location():
     if form.validate_on_submit():
         app.logger.debug('Форма прошла валидацию')
         try:
-            latitude = float(request.form['latitude'])
-            longitude = float(request.form['longitude'])
+            latitude = request.form.get('latitude', type=float)
+            longitude = request.form.get('longitude', type=float)
+
+            if latitude is None or longitude is None:
+                raise ValueError("Latitude или Longitude отсутствует или неверного типа.")
+
             app.logger.debug('Координаты: %s, %s', latitude, longitude)
             new_location = Location(
                 name=form.name.data,
                 address=form.address.data,
-                working_hours_start=form.working_hours_start.data,  # Используем отдельные поля для начала
-                working_hours_end=form.working_hours_end.data,  # и конца рабочего времени
+                working_hours_start=form.working_hours_start.data,
+                working_hours_end=form.working_hours_end.data,
                 average_check=form.average_check.data,
                 latitude=latitude,
                 longitude=longitude,
@@ -121,7 +126,7 @@ def add_location():
             db.session.commit()
             message = 'Точка успешно добавлена! 😊'
             app.logger.info(message)
-            return jsonify(success=True, message=message)
+            return jsonify(success=True, message=message, location_id=new_location.id)
         except Exception as e:
             message = f'Произошла ошибка при добавлении метки: {e} 🚫'
             app.logger.error(message)
@@ -132,21 +137,28 @@ def add_location():
         app.logger.error(f'Ошибка валидации формы: {form.errors}')
         return jsonify(success=False, message=message)
 
+
+
 @bp.route('/add_owner_info', methods=['POST'])
 @login_required
 def add_owner_info():
-    form = OwnerInfoForm()
+    form = OwnerInfoForm()  # Форма для добавления информации владельца
     if form.validate_on_submit():
         try:
-            location_id = request.form['location_id']
-            new_owner_info = OwnerInfo(
-                user_id=current_user.id,
-                location_id=location_id,
-                website=form.website.data,
-                owner_info=form.owner_info.data
-            )
-            db.session.add(new_owner_info)
+            user_id = current_user.id
+            location_id = request.form.get('location_id')
+            website = request.form.get('website')
+            owner_info = request.form.get('owner_info')
+
+            app.logger.info(f'User ID: {user_id}, Location ID: {location_id}, Website: {website}, Owner Info: {owner_info}')
+
+            if not location_id:
+                raise ValueError("Location ID is missing.")
+
+            owner_info_entry = OwnerInfo(user_id=user_id, location_id=int(location_id), website=website, owner_info=owner_info)
+            db.session.add(owner_info_entry)
             db.session.commit()
+
             message = 'Информация о владельце успешно добавлена в базу данных! 😊'
             app.logger.info(message)
             return jsonify(success=True, message=message)
@@ -159,6 +171,7 @@ def add_owner_info():
         message = f'Ошибки валидации формы: {", ".join(error_messages)} 🚫'
         app.logger.error(f'Ошибка валидации формы: {form.errors}')
         return jsonify(success=False, message=message)
+
 
 @bp.route('/markers')
 async def markers():
@@ -197,7 +210,6 @@ def reviews(location_id):
         } for review in reviews
     ]
     return jsonify(reviews_list)
-
 
 @bp.route('/add_review', methods=['POST'])
 @login_required

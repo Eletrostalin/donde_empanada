@@ -110,6 +110,9 @@
             <form id="add-marker-form" action="{{ url_for('main.add_location') }}" method="post" onsubmit="handleAddLocation(event)">
                 {{ location_form.hidden_tag() }}
                 {{ location_form.csrf_token }}
+                <input type="hidden" id="latitude" name="latitude">
+                <input type="hidden" id="longitude" name="longitude">
+
                 <div class="form-group">
                     <label for="name">Название</label>
                     <input type="text" id="name" class="form-control" name="name" placeholder="Название (не более 30 символов)" maxlength="30" required>
@@ -145,7 +148,7 @@
                 {{ owner_info_form.csrf_token }}
                 <div class="form-group">
                     <label for="website">Веб-сайт</label>
-                    <input type="url" id="website" class="form-control" name="website" placeholder="URL сайта (до 200 символов)" maxlength="200">
+                    <input type="text" id="website" class="form-control" name="website" placeholder="URL сайта (до 200 символов)" maxlength="200">
                 </div>
                 <div class="form-group">
                     <label for="owner_info">Информация о вас и вашем заведении</label>
