@@ -164,29 +164,30 @@
     <!-- Login Required Modal -->
     <div id="login-required-modal" class="modal">
         <div class="modal-content centered-form">
-            <p>Вы неавторизованы. Пожалуйста, авторизуйтесь, чтобы оставить отзыв.</p>
+            <p>Вы не авторизованы. Пожалуйста, авторизуйтесь, чтобы оставить отзыв.</p>
             <button type="button" class="btn btn-primary" onclick="showLoginModal()">Войти</button>
         </div>
     </div>
 
+
     <!-- Review Modal -->
-<div id="review-modal" class="modal">
-    <div class="modal-content centered-form">
-        <h4>Оставить отзыв</h4>
-        <form id="review-form" action="{{ url_for('main.add_review') }}" method="post" onsubmit="handleReviewSubmit(event)">
-            {{ review_form.hidden_tag() }}
-            {{ review_form.csrf_token }}
+    <div id="review-modal" class="modal">
+        <div class="modal-content centered-form">
+            <h4>Оставить отзыв</h4>
+            <form id="review-form" action="{{ url_for('main.add_review') }}" method="post" onsubmit="handleReviewSubmit(event)">
+                {{ review_form.hidden_tag() }}
+                {{ review_form.csrf_token }}
 
-            <div class="form-group">
-                <label for="review-comment">Ваш отзыв:</label>
-                <textarea id="review-comment" name="comment" class="form-control" rows="4"></textarea>
-            </div>
+                <div class="form-group">
+                    <label for="review-comment">Ваш отзыв:</label>
+                    <textarea id="review-comment" name="comment" class="form-control" rows="4"></textarea>
+                </div>
 
-            <input type="hidden" id="review-location-id" name="location_id">
-            <button type="submit" class="btn btn-primary">Отправить отзыв</button>
-        </form>
+                <input type="hidden" id="review-location-id" name="location_id">
+                <button type="submit" class="btn btn-primary">Отправить отзыв</button>
+            </form>
+        </div>
     </div>
-</div>
 
     <!-- Success Modal -->
     <div id="success-modal" class="modal">
@@ -199,8 +200,16 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <!-- Подключение модулей JavaScript -->
+    <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modals.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/forms.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/user.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+
+    <!-- Инициализация карты -->
     <script async src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap"></script>
 </body>
-
 </html>

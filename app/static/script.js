@@ -177,6 +177,10 @@ function toggleDropdown() {
     dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
 }
 
+function isUserAuthenticated() {
+    return !!document.getElementById('profileDropdown');
+}
+
 // Функции для работы с картой и маркерами
 function promptLocationSelection() {
     isAddingMarker = true;

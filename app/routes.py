@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from sqlalchemy.ext.asyncio import async_session
 from sqlalchemy.future import select
 
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app as app
@@ -9,7 +8,6 @@ from flask_login import login_user, logout_user, current_user, login_required
 from .database import get_async_engine, get_async_session
 from .models import db, User, Location, Review, OwnerInfo
 from .forms import RegistrationForm, LoginForm, LocationForm, OwnerInfoForm, ReviewForm
-import logging
 import os
 
 bp = Blueprint('main', __name__)
@@ -36,30 +34,44 @@ def index():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
+        app.logger.info("Форма прошла валидацию")
+
         existing_user_by_username = User.query.filter_by(username=form.username.data).first()
         existing_user_by_phone = User.query.filter_by(phone_hash=form.phone.data).first()
 
         if existing_user_by_username:
             message = 'Пользователь с таким именем уже существует. 🚫'
+            app.logger.info("Пользователь с таким именем уже существует.")
             return jsonify(success=False, message=message)
 
         if existing_user_by_phone:
             message = 'Пользователь с таким телефоном уже существует. 🚫'
+            app.logger.info("Пользователь с таким телефоном уже существует.")
             return jsonify(success=False, message=message)
 
-        user = User(
-            username=form.username.data,
-            email=form.email.data,
-            first_name=form.first_name.data,
-            second_name=form.second_name.data,
-        )
-        user.set_password(form.password.data)
-        user.set_phone(form.phone.data)
-        db.session.add(user)
-        db.session.commit()
-        message = 'Регистрация прошла успешно! 😊'
-        return jsonify(success=True, message=message)
+        try:
+            user = User(
+                username=form.username.data,
+                email=form.email.data,
+                first_name=form.first_name.data,
+                second_name=form.second_name.data,
+            )
+            user.set_password(form.password.data)
+            user.set_phone(form.phone.data)
+            db.session.add(user)
+            app.logger.info("Попытка коммита в базу данных")
+            db.session.commit()
+            message = 'Регистрация прошла успешно! 😊'
+            app.logger.info("Пользователь успешно добавлен в базу данных")
+            return jsonify(success=True, message=message)
+
+        except Exception as e:
+            app.logger.error(f"Ошибка при добавлении пользователя: {e}")
+            db.session.rollback()
+            return jsonify(success=False, message=f"Ошибка при добавлении пользователя: {e}")
+
     else:
+        app.logger.warning("Форма не прошла валидацию")
         error_messages = [f"{field}: {', '.join(errors)}" for field, errors in form.errors.items()]
         message = f'Ошибка регистрации: {", ".join(error_messages)} 🚫'
         return jsonify(success=False, message=message)
@@ -95,7 +107,6 @@ def logout():
     flash(message, 'success')
     app.logger.info(message)
     return redirect(url_for('main.index'))
-
 
 @bp.route('/add_location', methods=['POST'])
 @login_required
@@ -137,8 +148,6 @@ def add_location():
         app.logger.error(f'Ошибка валидации формы: {form.errors}')
         return jsonify(success=False, message=message)
 
-
-
 @bp.route('/add_owner_info', methods=['POST'])
 @login_required
 def add_owner_info():
@@ -171,7 +180,6 @@ def add_owner_info():
         message = f'Ошибки валидации формы: {", ".join(error_messages)} 🚫'
         app.logger.error(f'Ошибка валидации формы: {form.errors}')
         return jsonify(success=False, message=message)
-
 
 @bp.route('/markers')
 async def markers():
@@ -215,26 +223,48 @@ def reviews(location_id):
 @login_required
 def add_review():
     try:
-        location_id = request.form['location_id']
-        comment = request.form['comment']
+        # Логируем полученные данные
+        location_id_str = request.form.get('location_id', '').strip()
+        app.logger.info(f"Received location_id: {location_id_str}")
+
+        if not location_id_str:
+            raise ValueError("Location ID is missing or invalid.")
+
+        location_id = int(location_id_str)
+        comment = request.form['comment'].strip()
+
+        # Логируем полученный комментарий
+        app.logger.info(f"Received comment: {comment}")
 
         # Проверка на существование отзыва
         existing_review = Review.query.filter_by(user_id=current_user.id, location_id=location_id).first()
 
         if existing_review:
+            app.logger.info(f"Found existing review for location {location_id}")
             if existing_review.comment:
+                app.logger.info(f"User already added a review for location {location_id}")
                 return jsonify(success=False, message='Ваш отзыв уже добавлен.')
             else:
                 existing_review.comment = comment
                 existing_review.created_at = datetime.utcnow()
                 db.session.commit()
+                app.logger.info(f"Review updated for location {location_id}")
                 return jsonify(success=True, message='Ваш отзыв успешно обновлен!')
 
-        return jsonify(success=False, message='Ваш отзыв уже добавлен.')
+        # Если отзыв не найден, создаем новый
+        new_review = Review(user_id=current_user.id, location_id=location_id, comment=comment)
+        db.session.add(new_review)
+        db.session.commit()
+        app.logger.info(f"New review added for location {location_id}")
+        return jsonify(success=True, message='Ваш отзыв успешно добавлен!')
+
+    except ValueError as ve:
+        app.logger.error(f'Ошибка в данных формы: {ve}')
+        return jsonify(success=False, message=f'Ошибка в данных формы: {ve}')
+
     except Exception as e:
         app.logger.error(f'Ошибка при добавлении отзыва: {e}')
         return jsonify(success=False, message=f'Ошибка при добавлении отзыва: {e}')
-
 
 @bp.route('/rate_location', methods=['POST'])
 @login_required
