@@ -1,8 +1,23 @@
-Веб-приложение по функционалу копирующее мобильное приложение "Где шаверма". Пользователь может просматривать комментарии и оценки к ним. После авторизации может так же добавлять точки и оставлять комментарии.
+# Empanadas Sales Points Map
 
-На JS получилось много кода для фронта, но я не везде понимаю как он работает. Писал с gpt :) 
-Стек: flask, postgres, sqlalchemy, docker
+A web service with empanada sales points on the map. Users can add information, reviews, photos, and ratings. Business owners can add extended information. There is an admin panel available for administrators.
 
-Сейчас пепеписываю его под fastapi, и хочу перенести фронт на react
+## Current Features
+
+- User registration and authorization
+- Adding sales points to the map
+- Leaving reviews, uploading photos, and rating points
+- Extended information for business owners
+- Admin panel for administrators
+
+## Tech Stack
+
+- **Backend**: Flask
+- **Database**: PostgreSQL
+- **ORM**: SQLAlchemy
+
+## FastAPI Version
+
+Currently, I am creating a **FastAPI** version of this project in a neighboring repository. Feel free to check it out!
 
 
