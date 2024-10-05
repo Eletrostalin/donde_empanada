@@ -13,6 +13,7 @@ A web service with empanada sales points on the map. Users can add information, 
 ## Tech Stack
 
 - **Backend**: Flask
+- **Frontend**: JS
 - **Database**: PostgreSQL
 - **ORM**: SQLAlchemy
 
